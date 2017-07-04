@@ -4,21 +4,21 @@
 	"VersionName": "0.1",
 	"FriendlyName": "OnlineSubsystemDrift",
 	"Description": "Access to Drift platform",
-	"Category": "Online Platform",
+	"Category": "Drift",
 	"CreatedBy": "Directive Games Limited",
 	"CreatedByURL": "https://kaleo.io",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": false,
 	"Modules": [
 		{
 			"Name": "OnlineSubsystemDrift",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
-	],
-	"EnabledByDefault": false,
-	"CanContainContent": false,
-	"IsBetaVersion": true,
-	"Installed": false
+	]
 }
