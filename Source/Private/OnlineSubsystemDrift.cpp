@@ -219,6 +219,7 @@ bool FOnlineSubsystemDrift::Shutdown()
     if (VoiceInterface.IsValid() && bVoiceInterfaceInitialized)
     {
         VoiceInterface->Shutdown();
+        VoiceInterface = nullptr;
     }
     
     #define DESTRUCT_INTERFACE(Interface) \
