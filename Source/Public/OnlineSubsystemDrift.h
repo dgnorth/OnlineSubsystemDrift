@@ -130,6 +130,9 @@ private:
 
     /** Online async task thread */
     class FRunnableThread* OnlineAsyncTaskThread;
+
+    /** Task counter for generating unique thread names */
+    static FThreadSafeCounter TaskCounter;
 };
 
 typedef TSharedPtr<FOnlineSubsystemDrift, ESPMode::ThreadSafe> FOnlineSubsystemDriftPtr;
