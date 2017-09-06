@@ -257,6 +257,13 @@ bool FOnlineSubsystemDrift::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevic
     return false;
 }
 
+
+FText FOnlineSubsystemDrift::GetOnlineServiceName() const
+{
+    return NSLOCTEXT("OnlineSubsystemDrift", "OnlineServiceName", "Drift");
+}
+
+
 bool FOnlineSubsystemDrift::IsEnabled()
 {
     return true;
