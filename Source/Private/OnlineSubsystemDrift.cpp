@@ -25,6 +25,7 @@
 
 #include "DriftUtils.h"
 
+
 FThreadSafeCounter FOnlineSubsystemDrift::TaskCounter;
 
 IOnlineSessionPtr FOnlineSubsystemDrift::GetSessionInterface() const

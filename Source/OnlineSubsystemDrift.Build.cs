@@ -21,7 +21,20 @@ public class OnlineSubsystemDrift : ModuleRules
 		
 		Definitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
 
-		PublicDependencyModuleNames.AddRange(
+        PublicIncludePaths.AddRange(
+            new string[] {
+                "OnlineSubsystemDrift/Public",
+            }
+            );
+
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "OnlineSubsystemDrift/Private",
+            }
+            );
+
+        PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"OnlineSubsystemUtils",
