@@ -526,6 +526,7 @@ void FOnlineSessionDrift::OnMatchSearchStatusChanged(FName status)
             SessionSettings.bUsesStats = false;
             SessionSettings.NumPrivateConnections = 0;
             SessionSettings.NumPublicConnections = 2;   // TODO: Fill in from result
+            SessionSettings.Set(TEXT("match_id"), match.match_id, EOnlineDataAdvertisementType::Type::DontAdvertise);
 
             CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Done;
             CurrentSessionSearch.Reset();
