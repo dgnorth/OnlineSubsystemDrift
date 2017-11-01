@@ -4,7 +4,6 @@
 
 #include "VoiceInterface.h"
 #include "VoicePacketDrift.h"
-#include "OnlineSubsystemTypes.h"
 #include "OnlineSubsystemDriftTypes.h"
 #include "OnlineSubsystemDriftPackage.h"
 
