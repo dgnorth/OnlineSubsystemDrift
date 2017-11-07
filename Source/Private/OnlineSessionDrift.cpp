@@ -6,7 +6,6 @@
 #include "OnlineSubsystemDrift.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineAsyncTaskManagerDrift.h"
-#include "SocketSubsystem.h"
 
 #include "DriftAPI.h"
 

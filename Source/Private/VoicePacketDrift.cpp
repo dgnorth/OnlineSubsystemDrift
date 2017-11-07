@@ -4,7 +4,6 @@
 
 #include "VoicePacketDrift.h"
 #include "OnlineIdentityInterface.h"
-#include "Voice.h"
 
 /**
  * Copies another packet and inits the ref count

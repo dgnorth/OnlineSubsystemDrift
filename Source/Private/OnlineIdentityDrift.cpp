@@ -4,9 +4,6 @@
 #include "OnlineIdentityDrift.h"
 #include "OnlineSubsystemDrift.h"
 
-#include "IPAddress.h"
-#include "SocketSubsystem.h"
-
 #include "DriftAPI.h"
 
 bool FUserOnlineAccountDrift::GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const
@@ -270,6 +267,12 @@ FString FOnlineIdentityDrift::GetAuthToken(int32 LocalUserNum) const
     return FString();
 }
 
+
+void FOnlineIdentityDrift::RevokeAuthToken(const FUniqueNetId& UserId, const FOnRevokeAuthTokenCompleteDelegate& Delegate)
+{
+}
+
+
 FOnlineIdentityDrift::FOnlineIdentityDrift(class FOnlineSubsystemDrift* InSubsystem)
 : DriftSubsystem(InSubsystem)
 {
@@ -301,7 +304,7 @@ void FOnlineIdentityDrift::GetUserPrivilege(const FUniqueNetId& UserId, EUserPri
     Delegate.ExecuteIfBound(UserId, Privilege, (uint32)EPrivilegeResults::NoFailures);
 }
 
-FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId)
+FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const
 {
     for (int i = 0; i < MAX_LOCAL_PLAYERS; ++i)
     {
