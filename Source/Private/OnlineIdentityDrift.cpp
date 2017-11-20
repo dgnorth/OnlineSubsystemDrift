@@ -285,7 +285,11 @@ FOnlineIdentityDrift::FOnlineIdentityDrift(class FOnlineSubsystemDrift* InSubsys
 
 FOnlineIdentityDrift::FOnlineIdentityDrift()
 {
-    if (auto Drift = DriftSubsystem->GetDrift())
+}
+
+FOnlineIdentityDrift::~FOnlineIdentityDrift()
+{
+    if (auto Drift = DriftSubsystem ? DriftSubsystem->GetDrift() : nullptr)
     {
         Drift->OnServerRegistered().Remove(onServerRegisteredHandle);
         onServerRegisteredHandle.Reset();
@@ -293,10 +297,6 @@ FOnlineIdentityDrift::FOnlineIdentityDrift()
         Drift->OnPlayerAuthenticated().Remove(onAuthenticatedHandle);
         onAuthenticatedHandle.Reset();
     }
-}
-
-FOnlineIdentityDrift::~FOnlineIdentityDrift()
-{
 }
 
 void FOnlineIdentityDrift::GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate)
