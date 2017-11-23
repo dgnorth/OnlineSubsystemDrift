@@ -248,9 +248,14 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
         
         if (auto Drift = DriftSubsystem->GetDrift())
         {
-            // TODO: Use actual settings, but backend only really works with 2 players now
             onMatchAddedDelegateHandle = Drift->OnMatchAdded().AddRaw(this, &FOnlineSessionDrift::OnMatchAdded);
-            Drift->AddMatch(TEXT(""), TEXT(""), 1, 2);
+            FString mapName;
+            Session->SessionSettings.Get(TEXT("map_name"), mapName);
+            FString gameMode;
+            Session->SessionSettings.Get(TEXT("game_mode"), gameMode);
+            int32 numTeams{ 1 };
+            Session->SessionSettings.Get(TEXT("num_teams"), numTeams);
+            Drift->AddMatch(mapName, gameMode, numTeams, Session->NumOpenPublicConnections);
             Result = ERROR_IO_PENDING;
         }
 
@@ -684,7 +689,8 @@ void FOnlineSessionDrift::OnGotActiveMatches(bool success)
                 SessionSettings.bUsesPresence = false;
                 SessionSettings.bUsesStats = false;
                 SessionSettings.NumPrivateConnections = 0;
-                SessionSettings.NumPublicConnections = 2;   // TODO: Fill in from result
+                SessionSettings.NumPublicConnections = activeMatch.max_players - activeMatch.num_players;
+                SessionSettings.Set(TEXT("match_id"), activeMatch.match_id, EOnlineDataAdvertisementType::Type::DontAdvertise);
             }
             CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Done;
             CurrentSessionSearch.Reset();
@@ -704,7 +710,7 @@ bool FOnlineSessionDrift::JoinSession(int32 PlayerNum, FName SessionName, const 
 
         auto SessionInfo = new FOnlineSessionInfoDrift{};
         Session->SessionInfo = MakeShareable(SessionInfo);
-        auto DesiredSessionInfo = static_cast<FOnlineSessionInfoDrift*>(DesiredSession.Session.SessionInfo.Get());
+        const auto DesiredSessionInfo = static_cast<FOnlineSessionInfoDrift*>(DesiredSession.Session.SessionInfo.Get());
         SessionInfo->Url = DesiredSessionInfo->Url;
 
         Session->SessionSettings.bShouldAdvertise = false;
