@@ -1113,10 +1113,10 @@ void FMatchQueueSearch::OnPollQueueComplete(bool success, const FMatchQueueStatu
     delay = POLL_FREQUENCY;
     if (success)
     {
-        FName oldStatus = queueStatus;
+        const FName oldStatus{ queueStatus };
         if (status.status == FName(TEXT("waiting")))
         {
-            currentMatch = FActiveMatch{};
+            currentMatch = FMatchQueueMatch{};
         }
         else if (status.status == FName(TEXT("matched")))
         {
@@ -1124,11 +1124,11 @@ void FMatchQueueSearch::OnPollQueueComplete(bool success, const FMatchQueueStatu
         }
         else if (status.status == FName(TEXT("timedout")))
         {
-            currentMatch = FActiveMatch{};
+            currentMatch = FMatchQueueMatch{};
         }
         else if (status.status == FName(TEXT("usurped")))
         {
-            currentMatch = FActiveMatch{};
+            currentMatch = FMatchQueueMatch{};
         }
 
         if (oldStatus != status.status)

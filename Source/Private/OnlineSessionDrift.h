@@ -21,7 +21,7 @@ public:
 
     FMatchQueueStatusChangedDelegate& OnMatchQueueStatusChanged() { return onMatchQueueStatusChanged;  }
 
-    const FActiveMatch& GetCurrentMatch() { return currentMatch; }
+    const FMatchQueueMatch& GetCurrentMatch() { return currentMatch; }
 
 private:
     void PollQueue();
@@ -35,7 +35,7 @@ private:
     float delay{ POLL_FREQUENCY };
     FOnlineSubsystemDrift* DriftSubsystem;
     FName queueStatus;
-    FActiveMatch currentMatch;
+    FMatchQueueMatch currentMatch;
 };
 
 /**
