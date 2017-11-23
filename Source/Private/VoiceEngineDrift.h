@@ -4,7 +4,6 @@
 
 #include "VoiceInterface.h"
 #include "Voice.h"
-#include "OnlineSubsystemTypes.h"
 #include "OnlineSubsystemDriftTypes.h"
 #include "OnlineSubsystemDriftPackage.h"
 #include "Net/VoiceDataCommon.h"

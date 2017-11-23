@@ -4,9 +4,6 @@
 #include "OnlineIdentityDrift.h"
 #include "OnlineSubsystemDrift.h"
 
-#include "IPAddress.h"
-#include "SocketSubsystem.h"
-
 #include "DriftAPI.h"
 
 bool FUserOnlineAccountDrift::GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const
@@ -270,6 +267,12 @@ FString FOnlineIdentityDrift::GetAuthToken(int32 LocalUserNum) const
     return FString();
 }
 
+
+void FOnlineIdentityDrift::RevokeAuthToken(const FUniqueNetId& UserId, const FOnRevokeAuthTokenCompleteDelegate& Delegate)
+{
+}
+
+
 FOnlineIdentityDrift::FOnlineIdentityDrift(class FOnlineSubsystemDrift* InSubsystem)
 : DriftSubsystem(InSubsystem)
 {
@@ -282,7 +285,11 @@ FOnlineIdentityDrift::FOnlineIdentityDrift(class FOnlineSubsystemDrift* InSubsys
 
 FOnlineIdentityDrift::FOnlineIdentityDrift()
 {
-    if (auto Drift = DriftSubsystem->GetDrift())
+}
+
+FOnlineIdentityDrift::~FOnlineIdentityDrift()
+{
+    if (auto Drift = DriftSubsystem ? DriftSubsystem->GetDrift() : nullptr)
     {
         Drift->OnServerRegistered().Remove(onServerRegisteredHandle);
         onServerRegisteredHandle.Reset();
@@ -292,16 +299,12 @@ FOnlineIdentityDrift::FOnlineIdentityDrift()
     }
 }
 
-FOnlineIdentityDrift::~FOnlineIdentityDrift()
-{
-}
-
 void FOnlineIdentityDrift::GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate)
 {
     Delegate.ExecuteIfBound(UserId, Privilege, (uint32)EPrivilegeResults::NoFailures);
 }
 
-FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId)
+FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const
 {
     for (int i = 0; i < MAX_LOCAL_PLAYERS; ++i)
     {

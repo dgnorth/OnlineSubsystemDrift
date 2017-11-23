@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Core.h"
 #include "ModuleInterface.h"
 
 /**

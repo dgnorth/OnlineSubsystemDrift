@@ -48,13 +48,13 @@ void FOnlineSubsystemDriftModule::StartupModule()
 
     // Create and register our singleton factory with the main online subsystem for easy access
     FOnlineSubsystemModule& OSS = FModuleManager::GetModuleChecked<FOnlineSubsystemModule>("OnlineSubsystem");
-    OSS.RegisterPlatformService(NULL_SUBSYSTEM, DriftFactory);
+    OSS.RegisterPlatformService(DRIFT_SUBSYSTEM, DriftFactory);
 }
 
 void FOnlineSubsystemDriftModule::ShutdownModule()
 {
     FOnlineSubsystemModule& OSS = FModuleManager::GetModuleChecked<FOnlineSubsystemModule>("OnlineSubsystem");
-    OSS.UnregisterPlatformService(NULL_SUBSYSTEM);
+    OSS.UnregisterPlatformService(DRIFT_SUBSYSTEM);
     
     delete DriftFactory;
     DriftFactory = nullptr;
