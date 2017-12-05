@@ -419,7 +419,12 @@ bool FOnlineSessionDrift::DestroySession(FName SessionName, const FOnDestroySess
         {
             if (auto Drift = DriftSubsystem->GetDrift())
             {
-                Drift->UpdateMatch(TEXT("completed"), TEXT(""), FDriftMatchStatusUpdatedDelegate{});
+                Drift->UpdateMatch(TEXT("completed"), TEXT(""), FDriftMatchStatusUpdatedDelegate::CreateLambda([this](bool success)
+                {
+                    CompletionDelegate.ExecuteIfBound(SessionName, success);
+                    TriggerOnDestroySessionCompleteDelegates(SessionName, success);
+                }));
+                Result = ERROR_IO_PENDING;
             }
         }
     }
