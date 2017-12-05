@@ -419,7 +419,7 @@ bool FOnlineSessionDrift::DestroySession(FName SessionName, const FOnDestroySess
         {
             if (auto Drift = DriftSubsystem->GetDrift())
             {
-                Drift->UpdateMatch(TEXT("completed"), TEXT(""), FDriftMatchStatusUpdatedDelegate::CreateLambda([this](bool success)
+                Drift->UpdateMatch(TEXT("completed"), TEXT(""), FDriftMatchStatusUpdatedDelegate::CreateLambda([this, CompletionDelegate, SessionName](bool success)
                 {
                     CompletionDelegate.ExecuteIfBound(SessionName, success);
                     TriggerOnDestroySessionCompleteDelegates(SessionName, success);
