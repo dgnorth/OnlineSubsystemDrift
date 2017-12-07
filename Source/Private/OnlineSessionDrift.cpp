@@ -330,7 +330,8 @@ bool FOnlineSessionDrift::StartSession(FName SessionName)
         {
             UE_LOG_ONLINE(Warning, TEXT("Can't start an online session (%s) in state %s"),
                 *SessionName.ToString(),
-                EOnlineSessionState::ToString(Session->SessionState));
+                EOnlineSessionState::ToString(Session->SessionState))
+;
         }
     }
     else
@@ -384,7 +385,8 @@ bool FOnlineSessionDrift::EndSession(FName SessionName)
         {
             UE_LOG_ONLINE(Warning, TEXT("Can't end session (%s) in state %s"),
                 *SessionName.ToString(),
-                EOnlineSessionState::ToString(Session->SessionState));
+                EOnlineSessionState::ToString(Session->SessionState))
+;
         }
     }
     else
@@ -610,7 +612,7 @@ bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRe
 
         if (auto drift = DriftSubsystem->GetDrift())
         {
-            onGotActiveMatchesHandle = drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
+            drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
             DriftSearch = MakeShareable(new FMatchesSearch{});
             auto temp = DriftSearch.ToSharedRef();
             drift->GetActiveMatches(temp);
@@ -703,6 +705,16 @@ void FOnlineSessionDrift::OnGotActiveMatches(bool success)
     }
     TriggerOnFindSessionsCompleteDelegates(success);
 }
+
+
+FOnlineSessionDrift::~FOnlineSessionDrift()
+{
+    if (auto drift = DriftSubsystem->GetDrift())
+    {
+        drift->OnGotActiveMatches().RemoveAll(this);
+    }
+}
+
 
 bool FOnlineSessionDrift::JoinSession(int32 PlayerNum, FName SessionName, const FOnlineSessionSearchResult& DesiredSession)
 {

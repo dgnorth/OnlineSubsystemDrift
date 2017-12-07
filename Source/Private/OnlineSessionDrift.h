@@ -72,7 +72,6 @@ PACKAGE_SCOPE:
     TSharedPtr<FMatchQueueSearch> CurrentSearch;
 
     FDelegateHandle onMatchAddedDelegateHandle;
-    FDelegateHandle onGotActiveMatchesHandle;
 
     FOnlineSessionDrift(class FOnlineSubsystemDrift* InSubsystem) :
         DriftSubsystem(InSubsystem),
@@ -113,7 +112,7 @@ PACKAGE_SCOPE:
 
 public:
 
-    virtual ~FOnlineSessionDrift() {}
+    virtual ~FOnlineSessionDrift();
 
     virtual FNamedOnlineSession* GetNamedSession(FName SessionName) override;
     virtual void RemoveNamedSession(FName SessionName) override;
