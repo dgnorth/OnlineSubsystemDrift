@@ -566,24 +566,31 @@ bool FOnlineSessionDrift::CancelMatchmaking(int32 SearchingPlayerNum, FName Sess
 
     if (auto drift = DriftSubsystem->GetDrift())
     {
-        drift->LeaveMatchQueue(FDriftLeftMatchQueueDelegate::CreateLambda([this, SessionName](bool success)
-        {
-            if (success)
-            {
-                CurrentSearch.Reset();
-                if (CurrentSessionSearch.IsValid())
-                {
-                    CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
-                    CurrentSessionSearch.Reset();
-                }
-                TriggerOnCancelMatchmakingCompleteDelegates(SessionName, true);
-            }
-            else
-            {
-                TriggerOnCancelMatchmakingCompleteDelegates(SessionName, false);
-                return;
-            }
-        }));
+		if (drift->GetMatchQueueState() == EMatchQueueState::Queued)
+		{
+			drift->LeaveMatchQueue(FDriftLeftMatchQueueDelegate::CreateLambda([this, SessionName](bool success)
+			{
+				if (success)
+				{
+					CurrentSearch.Reset();
+					if (CurrentSessionSearch.IsValid())
+					{
+						CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
+						CurrentSessionSearch.Reset();
+					}
+					TriggerOnCancelMatchmakingCompleteDelegates(SessionName, true);
+				}
+				else
+				{
+					TriggerOnCancelMatchmakingCompleteDelegates(SessionName, false);
+					return;
+				}
+			}));
+		}
+		else
+		{
+			TriggerOnCancelMatchmakingCompleteDelegates(SessionName, false);
+		}
         return true;
     }
 
