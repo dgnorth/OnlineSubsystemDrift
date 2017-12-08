@@ -566,7 +566,8 @@ bool FOnlineSessionDrift::CancelMatchmaking(int32 SearchingPlayerNum, FName Sess
 
     if (auto drift = DriftSubsystem->GetDrift())
     {
-		if (drift->GetMatchQueueState() == EMatchQueueState::Queued)
+        const auto matchQueueState = drift->GetMatchQueueState();
+		if (matchQueueState == EMatchQueueState::Queued || matchQueueState == EMatchQueueState::Updating)
 		{
 			drift->LeaveMatchQueue(FDriftLeftMatchQueueDelegate::CreateLambda([this, SessionName](bool success)
 			{
