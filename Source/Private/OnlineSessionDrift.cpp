@@ -965,7 +965,7 @@ bool FOnlineSessionDrift::RegisterPlayers(FName SessionName, const TArray<TShare
                 {
                     if (auto Drift = DriftSubsystem->GetDrift())
                     {
-                        Drift->AddPlayerToMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), 0, FDriftPlayerAddedDelegate::CreateLambda([this, SessionName, Session, Players](bool success)
+                        Drift->AddPlayerToMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), 0, FDriftPlayerAddedDelegate::CreateLambda([this, SessionName, Players](bool success)
                         {
                             if (success)
                             {
@@ -1033,7 +1033,7 @@ bool FOnlineSessionDrift::UnregisterPlayers(FName SessionName, const TArray<TSha
                 {
                     if (auto Drift = DriftSubsystem->GetDrift())
                     {
-                        Drift->RemovePlayerFromMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), FDriftPlayerRemovedDelegate::CreateLambda([this, SessionName, Session, Players](bool success)
+                        Drift->RemovePlayerFromMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), FDriftPlayerRemovedDelegate::CreateLambda([this, SessionName, Players](bool success)
                         {
                             if (success)
                             {
