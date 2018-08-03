@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include "Misc/EngineVersionComparison.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemImpl.h"
 #include "OnlineSubsystemDriftPackage.h"
+
 
 typedef TSharedPtr<class FOnlineSessionDrift, ESPMode::ThreadSafe> FOnlineSessionDriftPtr;
 typedef TSharedPtr<class FOnlineProfileDrift, ESPMode::ThreadSafe> FOnlineProfileDriftPtr;
@@ -78,7 +80,11 @@ public:
      * Is the Drift API available for use
      * @return true if Drift functionality is available, false otherwise
      */
+#if UE_VERSION_NEWER_THAN(4, 20, 0)
+    bool IsEnabled() const;
+#else
     bool IsEnabled();
+#endif // UE_VERSION_NEWER_THAN(4, 20, 0)
 
 PACKAGE_SCOPE:
 

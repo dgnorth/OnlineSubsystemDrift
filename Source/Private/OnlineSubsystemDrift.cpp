@@ -264,8 +264,11 @@ FText FOnlineSubsystemDrift::GetOnlineServiceName() const
     return NSLOCTEXT("OnlineSubsystemDrift", "OnlineServiceName", "Drift");
 }
 
-
+#if UE_VERSION_NEWER_THAN(4, 20, 0)
+bool FOnlineSubsystemDrift::IsEnabled() const
+#else
 bool FOnlineSubsystemDrift::IsEnabled()
+#endif // UE_VERSION_NEWER_THAN(4, 20, 0)
 {
     return true;
 }

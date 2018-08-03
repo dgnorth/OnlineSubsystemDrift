@@ -11,6 +11,7 @@
 */
 
 using UnrealBuildTool;
+using System.IO;
 
 public class OnlineSubsystemDrift : ModuleRules
 {
@@ -22,14 +23,14 @@ public class OnlineSubsystemDrift : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                "OnlineSubsystemDrift/Public",
+                Path.Combine(ModuleDirectory, "Public"),
             }
             );
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                "OnlineSubsystemDrift/Private",
+                Path.Combine(ModuleDirectory, "Private"),
             }
             );
 

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Misc/EngineVersionComparison.h"
 #include "OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystemDriftTypes.h"
@@ -9,9 +10,11 @@
 
 #include "DriftAPI.h"
 
+
 class FOnlineSubsystemDrift;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FMatchQueueStatusChangedDelegate, FName);
+
 
 class FMatchQueueSearch : public TSharedFromThis<FMatchQueueSearch>
 {
@@ -114,12 +117,15 @@ public:
 
     virtual ~FOnlineSessionDrift();
 
+    // IOnlineSession
+#if UE_VERSION_NEWER_THAN(4, 20, 0)
+    virtual TSharedPtr<const FUniqueNetId> CreateSessionIdFromString(const FString& SessionIdStr) override;
+#endif // UE_VERSION_NEWER_THAN(4, 20, 0)
     virtual FNamedOnlineSession* GetNamedSession(FName SessionName) override;
     virtual void RemoveNamedSession(FName SessionName) override;
     virtual EOnlineSessionState::Type GetSessionState(FName SessionName) const override;
     virtual bool HasPresenceSession() override;
 
-    // IOnlineSession
     virtual bool CreateSession(int32 HostingPlayerNum, FName SessionName, const FOnlineSessionSettings& NewSessionSettings) override;
     virtual bool CreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings) override;
     virtual bool StartSession(FName SessionName) override;

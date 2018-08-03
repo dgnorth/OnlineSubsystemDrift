@@ -9,7 +9,8 @@
 
 #include "DriftAPI.h"
 
-#include "VoiceInterface.h"
+#include "Interfaces/VoiceInterface.h"
+#include "Containers/UnrealString.h"
 
 
 FOnlineSessionInfoDrift::FOnlineSessionInfoDrift()
@@ -49,7 +50,7 @@ public:
      */
     virtual FString ToString() const override
     {
-        return FString::Printf(TEXT("FOnlineAsyncTaskDriftEndSession bWasSuccessful: %d SessionName: %s"), bWasSuccessful, *SessionName.ToString());
+        return FString::Printf(TEXT("FOnlineAsyncTaskDriftEndSession bWasSuccessful: %d SessionName: %s"), WasSuccessful(), *SessionName.ToString());
     }
 
     /**
@@ -114,7 +115,7 @@ public:
      */
     virtual FString ToString() const override
     {
-        return FString::Printf(TEXT("FOnlineAsyncTaskDriftDestroySession bWasSuccessful: %d SessionName: %s"), bWasSuccessful, *SessionName.ToString());
+        return FString::Printf(TEXT("FOnlineAsyncTaskDriftDestroySession bWasSuccessful: %d SessionName: %s"), WasSuccessful(), *SessionName.ToString());
     }
 
     /**
@@ -168,6 +169,15 @@ class FNamedOnlineSession* FOnlineSessionDrift::AddNamedSession(FName SessionNam
     FScopeLock ScopeLock(&SessionLock);
     return new (Sessions) FNamedOnlineSession(SessionName, Session);
 }
+
+
+#if UE_VERSION_NEWER_THAN(4, 20, 0)
+TSharedPtr<const FUniqueNetId> FOnlineSessionDrift::CreateSessionIdFromString(const FString& SessionIdStr)
+{
+    return {};
+}
+#endif // UE_VERSION_NEWER_THAN(4, 20, 0)
+
 
 FNamedOnlineSession* FOnlineSessionDrift::GetNamedSession(FName SessionName)
 {
