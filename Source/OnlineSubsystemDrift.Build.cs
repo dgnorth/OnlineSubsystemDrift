@@ -18,8 +18,12 @@ public class OnlineSubsystemDrift : ModuleRules
 	public OnlineSubsystemDrift(ReadOnlyTargetRules TargetRules) : base(TargetRules)
     {
 		PCHUsage = PCHUsageMode.NoSharedPCHs;
-		
-		Definitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
+
+#if UE_4_19_OR_LATER
+        PublicDefinitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
+#else
+        Definitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
+#endif
 
         PublicIncludePaths.AddRange(
             new string[] {
