@@ -10,13 +10,15 @@
 * level directory of this module, and at https://mit-license.org/
 */
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OnlineSubsystemDrift : ModuleRules
 {
 	public OnlineSubsystemDrift(ReadOnlyTargetRules TargetRules) : base(TargetRules)
     {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		bFasterWithoutUnity = true;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicDefinitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
 

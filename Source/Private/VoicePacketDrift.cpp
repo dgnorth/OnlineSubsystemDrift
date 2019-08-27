@@ -1,9 +1,11 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
 
 #include "VoicePacketDrift.h"
+
 #include "OnlineIdentityInterface.h"
+#include "OnlineSubsystem.h"
+
 
 /**
  * Copies another packet and inits the ref count
@@ -44,8 +46,8 @@ TSharedPtr<const FUniqueNetId> FVoicePacketDrift::GetSender()
 	return Sender;
 }
 
-/** 
- * Serialize the voice packet data to a buffer 
+/**
+ * Serialize the voice packet data to a buffer
  *
  * @param Ar buffer to write into
  */

@@ -1,7 +1,7 @@
 /**
 * This file is part of the Drift Unreal Engine Integration.
 *
-* Copyright (C) 2016-2017 Directive Games Limited. All Rights Reserved.
+* Copyright (C) 2016-2019 Directive Games Limited. All Rights Reserved.
 *
 * Licensed under the MIT License (the "License");
 *
@@ -10,8 +10,8 @@
 * level directory of this module, and at https://mit-license.org/
 */
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
 #include "OnlineSubsystemDrift.h"
+
 #include "OnlineAsyncTaskManagerDrift.h"
 #include "OnlineSessionDrift.h"
 /*
@@ -71,7 +71,7 @@ IOnlineLeaderboardsPtr FOnlineSubsystemDrift::GetLeaderboardsInterface() const
 IOnlineVoicePtr FOnlineSubsystemDrift::GetVoiceInterface() const
 {
     if (VoiceInterface.IsValid() && !bVoiceInterfaceInitialized)
-    {   
+    {
         if (!VoiceInterface->Init())
         {
             VoiceInterface = nullptr;
@@ -138,6 +138,11 @@ IOnlinePresencePtr FOnlineSubsystemDrift::GetPresenceInterface() const
     return nullptr;
 }
 
+IOnlineStatsPtr FOnlineSubsystemDrift::GetStatsInterface() const
+{
+	return nullptr;
+}
+
 IOnlineChatPtr FOnlineSubsystemDrift::GetChatInterface() const
 {
     return nullptr;
@@ -146,6 +151,11 @@ IOnlineChatPtr FOnlineSubsystemDrift::GetChatInterface() const
 IOnlineTurnBasedPtr FOnlineSubsystemDrift::GetTurnBasedInterface() const
 {
     return nullptr;
+}
+
+IOnlineTournamentPtr FOnlineSubsystemDrift::GetTournamentInterface() const
+{
+	return nullptr;
 }
 
 bool FOnlineSubsystemDrift::Tick(float DeltaTime)
@@ -176,7 +186,7 @@ bool FOnlineSubsystemDrift::Tick(float DeltaTime)
 bool FOnlineSubsystemDrift::Init()
 {
     const bool bDriftInit = true;
-    
+
     if (bDriftInit)
     {
         // Create the online async task thread
@@ -224,23 +234,23 @@ bool FOnlineSubsystemDrift::Shutdown()
         VoiceInterface->Shutdown();
         VoiceInterface = nullptr;
     }
-    
+
     #define DESTRUCT_INTERFACE(Interface) \
     if (Interface.IsValid()) \
     { \
         ensure(Interface.IsUnique()); \
         Interface = nullptr; \
     }
- 
+
     // Destruct the interfaces
     DESTRUCT_INTERFACE(VoiceInterface);
     //DESTRUCT_INTERFACE(AchievementsInterface);
     DESTRUCT_INTERFACE(IdentityInterface);
     //DESTRUCT_INTERFACE(LeaderboardsInterface);
     DESTRUCT_INTERFACE(SessionInterface);
-    
+
     #undef DESTRUCT_INTERFACE
-    
+
     return true;
 }
 
@@ -262,12 +272,6 @@ bool FOnlineSubsystemDrift::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevic
 FText FOnlineSubsystemDrift::GetOnlineServiceName() const
 {
     return NSLOCTEXT("OnlineSubsystemDrift", "OnlineServiceName", "Drift");
-}
-
-
-bool FOnlineSubsystemDrift::IsEnabled()
-{
-    return true;
 }
 
 

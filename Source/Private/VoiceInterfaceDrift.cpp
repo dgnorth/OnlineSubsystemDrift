@@ -1,13 +1,13 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
+#include "VoiceInterfaceDrift.h"
 
 #include "OnlineSubsystem.h"
-#include "VoiceInterfaceDrift.h"
 #include "VoiceEngineDrift.h"
 #include "OnlineIdentityInterface.h"
 #include "OnlineSessionInterface.h"
 #include "Voice.h"
+#include "Templates/SharedPointer.h"
 
 /** Largest size to attempt to transmit */
 #define MAX_VOICE_PACKET_SIZE_IMPL 1 * 1024
@@ -164,7 +164,7 @@ void FOnlineVoiceDrift::StopNetworkedVoice(uint8 LocalUserNum)
 
 bool FOnlineVoiceDrift::RegisterLocalTalker(uint32 LocalUserNum) 
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (LocalUserNum >= 0 && LocalUserNum < (uint32)MaxLocalTalkers)
 	{
 		// Get at the local talker's cached data
@@ -179,7 +179,7 @@ bool FOnlineVoiceDrift::RegisterLocalTalker(uint32 LocalUserNum)
 				// Register the talker locally
 				Return = VoiceEngine->RegisterLocalTalker(LocalUserNum);
 				UE_LOG(LogVoice, Log, TEXT("RegisterLocalTalker(%d) returned 0x%08X"),	LocalUserNum, Return);
-				if (Return == S_OK)
+				if (Return == ONLINE_SUCCESS)
 				{
 					Talker.bIsRegistered = true;
 					if (0)
@@ -194,7 +194,7 @@ bool FOnlineVoiceDrift::RegisterLocalTalker(uint32 LocalUserNum)
 			else
 			{
 				// Just say yes, we registered fine
-				Return = S_OK;
+				Return = ONLINE_SUCCESS;
 			}
 			
 			// @todo ONLINE - update mute list?
@@ -209,7 +209,7 @@ bool FOnlineVoiceDrift::RegisterLocalTalker(uint32 LocalUserNum)
 	{
 		UE_LOG(LogVoice, Log, TEXT("Invalid user specified in RegisterLocalTalker(%d)"), LocalUserNum);
 	}
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
 }
 
 void FOnlineVoiceDrift::RegisterLocalTalkers()
@@ -225,7 +225,7 @@ void FOnlineVoiceDrift::RegisterLocalTalkers()
 
 bool FOnlineVoiceDrift::UnregisterLocalTalker(uint32 LocalUserNum) 
 {
-	uint32 Return = S_OK;
+	uint32 Return = ONLINE_SUCCESS;
 	if (LocalUserNum >= 0 && LocalUserNum < (uint32)MaxLocalTalkers)
 	{
 		// Get at the local talker's cached data
@@ -262,7 +262,7 @@ bool FOnlineVoiceDrift::UnregisterLocalTalker(uint32 LocalUserNum)
 	{
 		UE_LOG(LogVoice, Log, TEXT("Invalid user specified in UnregisterLocalTalker(%d)"), LocalUserNum);
 	}
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
 }
 
 void FOnlineVoiceDrift::UnregisterLocalTalkers()
@@ -278,7 +278,7 @@ void FOnlineVoiceDrift::UnregisterLocalTalkers()
 
 bool FOnlineVoiceDrift::RegisterRemoteTalker(const FUniqueNetId& UniqueId) 
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (OnlineSubsystem)
 	{
 		// Skip this if the session isn't active
@@ -304,7 +304,7 @@ bool FOnlineVoiceDrift::RegisterRemoteTalker(const FUniqueNetId& UniqueId)
 			else
 			{
 				UE_LOG(LogVoice, Verbose, TEXT("Remote talker %s is being re-registered"), *UniqueId.ToDebugString());
-				Return = S_OK;
+				Return = ONLINE_SUCCESS;
 			}
 			
 			// Update muting all of the local talkers with this remote talker
@@ -314,12 +314,12 @@ bool FOnlineVoiceDrift::RegisterRemoteTalker(const FUniqueNetId& UniqueId)
 			UE_LOG(LogVoice, Log, TEXT("StartRemoteVoiceProcessing(%s) returned 0x%08X"), *UniqueId.ToDebugString(), Return);
 		}
 	}
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
 }
 
 bool FOnlineVoiceDrift::UnregisterRemoteTalker(const FUniqueNetId& UniqueId) 
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (OnlineSubsystem)
 	{
 		// Skip this if the session isn't active
@@ -357,7 +357,7 @@ bool FOnlineVoiceDrift::UnregisterRemoteTalker(const FUniqueNetId& UniqueId)
 			}
 		}
 	}
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
 }
 
 void FOnlineVoiceDrift::RemoveAllRemoteTalkers()
@@ -432,7 +432,7 @@ bool FOnlineVoiceDrift::IsLocallyMuted(const FUniqueNetId& UniqueId) const
 
 bool FOnlineVoiceDrift::MuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId& PlayerId, bool bIsSystemWide)
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (LocalUserNum >= 0 && LocalUserNum < MaxLocalTalkers )
 	{
 		if (bIsSystemWide)
@@ -452,7 +452,7 @@ bool FOnlineVoiceDrift::MuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId&
 				if (Talker != NULL)
 				{
 					MuteList.AddUnique((const FUniqueNetIdDrift&)PlayerId);
-					Return = S_OK;
+					Return = ONLINE_SUCCESS;
 					UE_LOG(LogVoice, Log, TEXT("Muting remote talker (%s)"), *PlayerId.ToDebugString());
 				}
 				else
@@ -467,12 +467,12 @@ bool FOnlineVoiceDrift::MuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId&
 		UE_LOG(LogVoice, Warning, TEXT("Invalid user specified in MuteRemoteTalker(%d)"), LocalUserNum);
 	}
 
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
 }
 
 bool FOnlineVoiceDrift::UnmuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId& PlayerId, bool bIsSystemWide)
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (LocalUserNum >= 0 && LocalUserNum < MaxLocalTalkers )
 	{
 		if (bIsSystemWide)
@@ -513,7 +513,12 @@ bool FOnlineVoiceDrift::UnmuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetI
 		UE_LOG(LogVoice, Warning, TEXT("Invalid user specified in UnmuteRemoteTalker(%d)"), LocalUserNum);
 	}
 
-	return Return == S_OK;
+	return Return == ONLINE_SUCCESS;
+}
+
+IVoiceEnginePtr FOnlineVoiceDrift::CreateVoiceEngine()
+{
+	return MakeShareable(new FVoiceEngineDrift(OnlineSubsystem));
 }
 
 void FOnlineVoiceDrift::ProcessMuteChangeNotification()
@@ -705,7 +710,7 @@ void FOnlineVoiceDrift::ProcessLocalVoicePackets()
 						VoiceData.LocalPackets[Index].Sender = IdentityInt->GetUniquePlayerId(Index);
 						// Process this user
 						uint32 Result = VoiceEngine->ReadLocalVoiceData(Index, BufferStart, &SpaceAvail);
-						if (Result == S_OK)
+						if (Result == ONLINE_SUCCESS)
 						{
 							if (LocalTalkers[Index].bHasNetworkedVoice && SpaceAvail <= MAX_VOICE_PACKET_SIZE_IMPL)
 							{
@@ -768,7 +773,7 @@ void FOnlineVoiceDrift::ProcessRemoteVoicePackets()
 				uint32 VoiceBufferSize = VoicePacket->GetBufferSize();
 				// Submit this packet to the voice engine
 				uint32 Result = VoiceEngine->SubmitRemoteVoiceData(*VoicePacket->Sender, VoicePacket->Buffer.GetData(), &VoiceBufferSize);
-				if (Result != S_OK)
+				if (Result != ONLINE_SUCCESS)
 				{
 					UE_LOG(LogVoiceDecode, Warning,
 						TEXT("SubmitRemoteVoiceData(%s) failed with 0x%08X"),

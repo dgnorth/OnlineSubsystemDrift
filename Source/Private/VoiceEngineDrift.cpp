@@ -1,8 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
-
 #include "VoiceEngineDrift.h"
+
 #include "OnlineSubsystem.h"
 #include "VoiceInterfaceDrift.h"
 
@@ -10,6 +9,7 @@
 #include "SoundDefinitions.h"
 #include "Runtime/Engine/Classes/Sound/SoundWaveProcedural.h"
 #include "OnlineSubsystemUtils.h"
+
 
 /** Largest size preallocated for compressed data */
 #define MAX_COMPRESSED_VOICE_BUFFER_SIZE 8 * 1024
@@ -155,9 +155,9 @@ bool FVoiceEngineDrift::Init(int32 MaxLocalTalkers, int32 MaxRemoteTalkers)
 	return bSuccess;
 }
 
-uint32 FVoiceEngineDrift::StartLocalVoiceProcessing(uint32 LocalUserNum) 
+uint32 FVoiceEngineDrift::StartLocalVoiceProcessing(uint32 LocalUserNum)
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (IsOwningUser(LocalUserNum))
 	{
 		if (!bIsCapturing)
@@ -173,7 +173,7 @@ uint32 FVoiceEngineDrift::StartLocalVoiceProcessing(uint32 LocalUserNum)
 			bIsCapturing = true;
 		}
 
-		Return = S_OK;
+		Return = ONLINE_SUCCESS;
 	}
 	else
 	{
@@ -183,9 +183,9 @@ uint32 FVoiceEngineDrift::StartLocalVoiceProcessing(uint32 LocalUserNum)
 	return Return;
 }
 
-uint32 FVoiceEngineDrift::StopLocalVoiceProcessing(uint32 LocalUserNum) 
+uint32 FVoiceEngineDrift::StopLocalVoiceProcessing(uint32 LocalUserNum)
 {
-	uint32 Return = E_FAIL;
+	uint32 Return = ONLINE_FAIL;
 	if (IsOwningUser(LocalUserNum))
 	{
 		if (bIsCapturing)
@@ -200,7 +200,7 @@ uint32 FVoiceEngineDrift::StopLocalVoiceProcessing(uint32 LocalUserNum)
 			VoiceCaptureUpdate();
 		}
 
-		Return = S_OK;
+		Return = ONLINE_SUCCESS;
 	}
 	else
 	{
@@ -222,11 +222,11 @@ uint32 FVoiceEngineDrift::UnregisterRemoteTalker(const FUniqueNetId& UniqueId)
 			RemoteData->AudioComponent->Stop();
 			RemoteData->AudioComponent = nullptr;
 		}
-		
+
 		RemoteTalkerBuffers.Remove(RemoteTalkerId);
 	}
 
-	return S_OK;
+	return ONLINE_SUCCESS;
 }
 
 uint32 FVoiceEngineDrift::GetVoiceDataReadyFlags() const
@@ -263,14 +263,14 @@ uint32 FVoiceEngineDrift::ReadLocalVoiceData(uint32 LocalUserNum, uint8* Data, u
 		if (VoiceResult != EVoiceCaptureState::Ok && VoiceResult != EVoiceCaptureState::NoData)
 		{
 			UE_LOG(LogVoiceEncode, Warning, TEXT("ReadLocalVoiceData: GetAvailableVoice failure: VoiceResult: %s"), EVoiceCaptureState::ToString(VoiceResult));
-			return E_FAIL;
+			return ONLINE_FAIL;
 		}
 
  		if (NewVoiceDataBytes == 0)
  		{
  			UE_LOG(LogVoiceEncode, VeryVerbose, TEXT("ReadLocalVoiceData: No Data: VoiceResult: %s"), EVoiceCaptureState::ToString(VoiceResult));
  			*Size = 0;
- 			return S_OK;
+ 			return ONLINE_SUCCESS;
  		}
 
 		// Make space for new and any previously remaining data
@@ -327,7 +327,7 @@ uint32 FVoiceEngineDrift::ReadLocalVoiceData(uint32 LocalUserNum, uint8* Data, u
 				FMemory::Memcpy(Data, CompressedVoiceBuffer.GetData(), *Size);
 
 				UE_LOG(LogVoiceEncode, VeryVerbose, TEXT("ReadLocalVoiceData: Size: %d"), *Size);
-				return S_OK;
+				return ONLINE_SUCCESS;
 			}
 			else
 			{
@@ -335,12 +335,12 @@ uint32 FVoiceEngineDrift::ReadLocalVoiceData(uint32 LocalUserNum, uint8* Data, u
 				CompressedVoiceBuffer.Empty(MAX_COMPRESSED_VOICE_BUFFER_SIZE);
 
 				UE_LOG(LogVoiceEncode, Warning, TEXT("ReadLocalVoiceData: GetVoice failure: VoiceResult: %s"), EVoiceCaptureState::ToString(VoiceResult));
-				return E_FAIL;
+				return ONLINE_FAIL;
 			}
 		}
 	}
 
-	return E_FAIL;
+	return ONLINE_FAIL;
 }
 
 uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalkerId, uint8* Data, uint32* Size)
@@ -363,7 +363,7 @@ uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalker
 	if (BytesWritten <= 0)
 	{
 		*Size = 0;
-		return S_OK;
+		return ONLINE_SUCCESS;
 	}
 
 	bool bAudioComponentCreated = false;
@@ -381,7 +381,7 @@ uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalker
 			QueuedData.AudioComponent->OnAudioFinishedNative.AddRaw(this, &FVoiceEngineDrift::OnAudioFinished);
 		}
 	}
-	
+
 	if (QueuedData.AudioComponent != nullptr)
 	{
 		if (!QueuedData.AudioComponent->IsActive())
@@ -402,7 +402,7 @@ uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalker
 		SoundStreaming->QueueAudio(DecompressedVoiceBuffer.GetData(), BytesWritten);
 	}
 
-	return S_OK;
+	return ONLINE_SUCCESS;
 }
 
 void FVoiceEngineDrift::TickTalkers(float DeltaTime)
@@ -451,7 +451,7 @@ FString FVoiceEngineDrift::GetVoiceDebugState() const
 {
 	FString Output;
 	Output = FString::Printf(TEXT("IsRecording: %d\n DataReady: 0x%08x State:%s\n UncompressedBytes: %d\n CompressedBytes: %d\n"),
-		IsRecording(), 
+		IsRecording(),
 		GetVoiceDataReadyFlags(),
 		EVoiceCaptureState::ToString(AvailableVoiceResult),
 		UncompressedBytesAvailable,

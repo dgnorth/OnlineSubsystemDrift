@@ -36,40 +36,42 @@ public:
 
     // IOnlineSubsystem
 
-    virtual IOnlineSessionPtr GetSessionInterface() const override;
-    virtual IOnlineFriendsPtr GetFriendsInterface() const override;
-    virtual IOnlinePartyPtr GetPartyInterface() const override;
-    virtual IOnlineGroupsPtr GetGroupsInterface() const override;
-    virtual IOnlineSharedCloudPtr GetSharedCloudInterface() const override;
-    virtual IOnlineUserCloudPtr GetUserCloudInterface() const override;
-    virtual IOnlineEntitlementsPtr GetEntitlementsInterface() const override;
-    virtual IOnlineLeaderboardsPtr GetLeaderboardsInterface() const override;
-    virtual IOnlineVoicePtr GetVoiceInterface() const override;
-    virtual IOnlineExternalUIPtr GetExternalUIInterface() const override;   
-    virtual IOnlineTimePtr GetTimeInterface() const override;
-    virtual IOnlineIdentityPtr GetIdentityInterface() const override;
-    virtual IOnlineTitleFilePtr GetTitleFileInterface() const override;
-    virtual IOnlineStorePtr GetStoreInterface() const override;
-    virtual IOnlineStoreV2Ptr GetStoreV2Interface() const override { return nullptr; }
-    virtual IOnlinePurchasePtr GetPurchaseInterface() const override { return nullptr; }
-    virtual IOnlineEventsPtr GetEventsInterface() const override;
-    virtual IOnlineAchievementsPtr GetAchievementsInterface() const override;
-    virtual IOnlineSharingPtr GetSharingInterface() const override;
-    virtual IOnlineUserPtr GetUserInterface() const override;
-    virtual IOnlineMessagePtr GetMessageInterface() const override;
-    virtual IOnlinePresencePtr GetPresenceInterface() const override;
-    virtual IOnlineChatPtr GetChatInterface() const override;
-    virtual IOnlineTurnBasedPtr GetTurnBasedInterface() const override;
-    
-    virtual bool Init() override;
-    virtual bool Shutdown() override;
-    virtual FString GetAppId() const override;
-    virtual bool Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
+    IOnlineSessionPtr GetSessionInterface() const override;
+    IOnlineFriendsPtr GetFriendsInterface() const override;
+    IOnlinePartyPtr GetPartyInterface() const override;
+    IOnlineGroupsPtr GetGroupsInterface() const override;
+    IOnlineSharedCloudPtr GetSharedCloudInterface() const override;
+    IOnlineUserCloudPtr GetUserCloudInterface() const override;
+    IOnlineEntitlementsPtr GetEntitlementsInterface() const override;
+    IOnlineLeaderboardsPtr GetLeaderboardsInterface() const override;
+    IOnlineVoicePtr GetVoiceInterface() const override;
+    IOnlineExternalUIPtr GetExternalUIInterface() const override;
+    IOnlineTimePtr GetTimeInterface() const override;
+    IOnlineIdentityPtr GetIdentityInterface() const override;
+    IOnlineTitleFilePtr GetTitleFileInterface() const override;
+    IOnlineStorePtr GetStoreInterface() const override;
+    IOnlineStoreV2Ptr GetStoreV2Interface() const override { return nullptr; }
+    IOnlinePurchasePtr GetPurchaseInterface() const override { return nullptr; }
+    IOnlineEventsPtr GetEventsInterface() const override;
+    IOnlineAchievementsPtr GetAchievementsInterface() const override;
+    IOnlineSharingPtr GetSharingInterface() const override;
+    IOnlineUserPtr GetUserInterface() const override;
+    IOnlineMessagePtr GetMessageInterface() const override;
+    IOnlinePresencePtr GetPresenceInterface() const override;
+    IOnlineChatPtr GetChatInterface() const override;
+	IOnlineStatsPtr GetStatsInterface() const override;
+	IOnlineTurnBasedPtr GetTurnBasedInterface() const override;
+	IOnlineTournamentPtr GetTournamentInterface() const override;
 
-    virtual FText GetOnlineServiceName() const override;
+    bool Init() override;
+    bool Shutdown() override;
+    FString GetAppId() const override;
+    bool Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
 
-    // FTickerObjectBase
-    
+	FText GetOnlineServiceName() const override;
+
+	// FTickerObjectBase
+
     virtual bool Tick(float DeltaTime) override;
 
     // FOnlineSubsystemDrift
@@ -78,23 +80,12 @@ public:
      * Is the Drift API available for use
      * @return true if Drift functionality is available, false otherwise
      */
-    bool IsEnabled();
+    //bool IsEnabled();
 
 PACKAGE_SCOPE:
 
     FOnlineSubsystemDrift(FName InInstanceName) :
         FOnlineSubsystemImpl(DRIFT_SUBSYSTEM, InInstanceName),
-        SessionInterface(nullptr),
-        VoiceInterface(nullptr),
-        bVoiceInterfaceInitialized(false),
-        LeaderboardsInterface(nullptr),
-        IdentityInterface(nullptr),
-        AchievementsInterface(nullptr),
-        OnlineAsyncTaskThreadRunnable(nullptr),
-        OnlineAsyncTaskThread(nullptr)
-    {}
-
-    FOnlineSubsystemDrift() :
         SessionInterface(nullptr),
         VoiceInterface(nullptr),
         bVoiceInterfaceInitialized(false),
