@@ -114,12 +114,12 @@ public:
 
     virtual ~FOnlineSessionDrift();
 
-    virtual FNamedOnlineSession* GetNamedSession(FName SessionName) override;
-    virtual void RemoveNamedSession(FName SessionName) override;
-    virtual EOnlineSessionState::Type GetSessionState(FName SessionName) const override;
-    virtual bool HasPresenceSession() override;
-
     // IOnlineSession
+	TSharedPtr<const FUniqueNetId> CreateSessionIdFromString(const FString& SessionIdStr) override;
+	virtual FNamedOnlineSession* GetNamedSession(FName SessionName) override;
+    virtual void RemoveNamedSession(FName SessionName) override;
+    virtual bool HasPresenceSession() override;
+    virtual EOnlineSessionState::Type GetSessionState(FName SessionName) const override;
     virtual bool CreateSession(int32 HostingPlayerNum, FName SessionName, const FOnlineSessionSettings& NewSessionSettings) override;
     virtual bool CreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings) override;
     virtual bool StartSession(FName SessionName) override;

@@ -1,7 +1,8 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016-2019 Directive Games Limited - All Rights Reserved
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
+
 #include "OnlineSessionDrift.h"
+
 #include "OnlineIdentityInterface.h"
 #include "OnlineSubsystemDrift.h"
 #include "OnlineSubsystemUtils.h"
@@ -49,7 +50,7 @@ public:
      */
     virtual FString ToString() const override
     {
-        return FString::Printf(TEXT("FOnlineAsyncTaskDriftEndSession bWasSuccessful: %d SessionName: %s"), bWasSuccessful, *SessionName.ToString());
+        return FString::Printf(TEXT("FOnlineAsyncTaskDriftEndSession bWasSuccessful: %d SessionName: %s"), !!bWasSuccessful, *SessionName.ToString());
     }
 
     /**
@@ -114,7 +115,7 @@ public:
      */
     virtual FString ToString() const override
     {
-        return FString::Printf(TEXT("FOnlineAsyncTaskDriftDestroySession bWasSuccessful: %d SessionName: %s"), bWasSuccessful, *SessionName.ToString());
+        return FString::Printf(TEXT("FOnlineAsyncTaskDriftDestroySession bWasSuccessful: %d SessionName: %s"), !!bWasSuccessful, *SessionName.ToString());
     }
 
     /**
@@ -167,6 +168,12 @@ class FNamedOnlineSession* FOnlineSessionDrift::AddNamedSession(FName SessionNam
 {
     FScopeLock ScopeLock(&SessionLock);
     return new (Sessions) FNamedOnlineSession(SessionName, Session);
+}
+
+TSharedPtr<const FUniqueNetId> FOnlineSessionDrift::CreateSessionIdFromString(const FString& SessionIdStr)
+{
+	// TODO: Implement
+	return nullptr;	
 }
 
 FNamedOnlineSession* FOnlineSessionDrift::GetNamedSession(FName SessionName)
@@ -225,7 +232,7 @@ bool FOnlineSessionDrift::HasPresenceSession()
 
 bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionName, const FOnlineSessionSettings& NewSessionSettings)
 {
-    uint32 Result = E_FAIL;
+    uint32 Result = ONLINE_FAIL;
 
     FNamedOnlineSession* Session = GetNamedSession(SessionName);
     if (Session == nullptr)
@@ -245,7 +252,7 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
         FOnlineSessionInfoDrift* NewSessionInfo = new FOnlineSessionInfoDrift();
         NewSessionInfo->Init(*DriftSubsystem);
         Session->SessionInfo = MakeShareable(NewSessionInfo);
-        
+
         if (auto Drift = DriftSubsystem->GetDrift())
         {
             onMatchAddedDelegateHandle = Drift->OnMatchAdded().AddRaw(this, &FOnlineSessionDrift::OnMatchAdded);
@@ -256,14 +263,14 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
             int32 numTeams{ 1 };
             Session->SessionSettings.Get(TEXT("num_teams"), numTeams);
             Drift->AddMatch(mapName, gameMode, numTeams, Session->NumOpenPublicConnections);
-            Result = ERROR_IO_PENDING;
+            Result = ONLINE_IO_PENDING;
         }
 
-        if (Result != ERROR_IO_PENDING)
+        if (Result != ONLINE_IO_PENDING)
         {
             Session->SessionState = EOnlineSessionState::Pending;
 
-            if (Result != ERROR_SUCCESS)
+            if (Result != ONLINE_SUCCESS)
             {
                 RemoveNamedSession(SessionName);
             }
@@ -278,12 +285,12 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
         UE_LOG_ONLINE(Warning, TEXT("Cannot create session '%s': session already exists."), *SessionName.ToString());
     }
 
-    if (Result != ERROR_IO_PENDING)
+    if (Result != ONLINE_IO_PENDING)
     {
-        TriggerOnCreateSessionCompleteDelegates(SessionName, (Result == ERROR_SUCCESS) ? true : false);
+        TriggerOnCreateSessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
     }
-    
-    return Result == ERROR_IO_PENDING || Result == ERROR_SUCCESS;
+
+    return Result == ONLINE_IO_PENDING || Result == ONLINE_SUCCESS;
 }
 
 bool FOnlineSessionDrift::CreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings)
@@ -311,7 +318,7 @@ void FOnlineSessionDrift::OnMatchAdded(bool success)
 
 bool FOnlineSessionDrift::StartSession(FName SessionName)
 {
-    uint32 Result = E_FAIL;
+    uint32 Result = ONLINE_FAIL;
 
     auto Session = GetNamedSession(SessionName);
     if (Session)
@@ -339,12 +346,12 @@ bool FOnlineSessionDrift::StartSession(FName SessionName)
         UE_LOG_ONLINE(Warning, TEXT("Can't start an online game for session (%s) that hasn't been created"), *SessionName.ToString());
     }
 
-    if (Result != ERROR_IO_PENDING)
+    if (Result != ONLINE_IO_PENDING)
     {
-        TriggerOnStartSessionCompleteDelegates(SessionName, (Result == ERROR_SUCCESS) ? true : false);
+        TriggerOnStartSessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
     }
 
-    return Result == ERROR_SUCCESS || Result == ERROR_IO_PENDING;
+    return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSettings& UpdatedSessionSettings, bool bShouldRefreshOnlineData)
@@ -364,7 +371,7 @@ bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSetting
 
 bool FOnlineSessionDrift::EndSession(FName SessionName)
 {
-    uint32 Result = E_FAIL;
+    uint32 Result = ONLINE_FAIL;
 
     FNamedOnlineSession* Session = GetNamedSession(SessionName);
     if (Session)
@@ -395,22 +402,22 @@ bool FOnlineSessionDrift::EndSession(FName SessionName)
             *SessionName.ToString());
     }
 
-    if (Result != ERROR_IO_PENDING)
+    if (Result != ONLINE_IO_PENDING)
     {
         if (Session)
         {
             Session->SessionState = EOnlineSessionState::Ended;
         }
 
-        TriggerOnEndSessionCompleteDelegates(SessionName, (Result == ERROR_SUCCESS) ? true : false);
+        TriggerOnEndSessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
     }
 
-    return Result == ERROR_SUCCESS || Result == ERROR_IO_PENDING;
+    return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::DestroySession(FName SessionName, const FOnDestroySessionCompleteDelegate& CompletionDelegate)
 {
-    uint32 Result = E_FAIL;
+    uint32 Result = ONLINE_FAIL;
     // Find the session in question
     FNamedOnlineSession* Session = GetNamedSession(SessionName);
     if (Session)
@@ -426,7 +433,7 @@ bool FOnlineSessionDrift::DestroySession(FName SessionName, const FOnDestroySess
                     CompletionDelegate.ExecuteIfBound(SessionName, success);
                     TriggerOnDestroySessionCompleteDelegates(SessionName, success);
                 }));
-                Result = ERROR_IO_PENDING;
+                Result = ONLINE_IO_PENDING;
             }
         }
     }
@@ -435,13 +442,13 @@ bool FOnlineSessionDrift::DestroySession(FName SessionName, const FOnDestroySess
         UE_LOG_ONLINE(Warning, TEXT("Can't destroy a null online session (%s)"), *SessionName.ToString());
     }
 
-    if (Result != ERROR_IO_PENDING)
+    if (Result != ONLINE_IO_PENDING)
     {
-        CompletionDelegate.ExecuteIfBound(SessionName, (Result == ERROR_SUCCESS) ? true : false);
-        TriggerOnDestroySessionCompleteDelegates(SessionName, (Result == ERROR_SUCCESS) ? true : false);
+        CompletionDelegate.ExecuteIfBound(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
+        TriggerOnDestroySessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
     }
 
-    return Result == ERROR_SUCCESS || Result == ERROR_IO_PENDING;
+    return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::IsPlayerInSession(FName SessionName, const FUniqueNetId& UniqueId)
@@ -609,7 +616,7 @@ bool FOnlineSessionDrift::CancelMatchmaking(const FUniqueNetId& SearchingPlayerI
 
 bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRef<FOnlineSessionSearch>& SearchSettings)
 {
-    uint32 Return = E_FAIL;
+    uint32 Return = ONLINE_FAIL;
 
     if (!CurrentSessionSearch.IsValid() && SearchSettings->SearchState != EOnlineAsyncTaskState::InProgress)
     {
@@ -624,10 +631,10 @@ bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRe
             DriftSearch = MakeShareable(new FMatchesSearch{});
             auto temp = DriftSearch.ToSharedRef();
             drift->GetActiveMatches(temp);
-            Return = ERROR_IO_PENDING;
+            Return = ONLINE_IO_PENDING;
         }
 
-        if (Return == ERROR_IO_PENDING)
+        if (Return == ONLINE_IO_PENDING)
         {
             SearchSettings->SearchState = EOnlineAsyncTaskState::InProgress;
         }
@@ -635,10 +642,10 @@ bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRe
     else
     {
         UE_LOG_ONLINE(Warning, TEXT("Ignoring game search request while one is pending"));
-        Return = ERROR_IO_PENDING;
+        Return = ONLINE_IO_PENDING;
     }
 
-    return Return == ERROR_SUCCESS || Return == ERROR_IO_PENDING;
+    return Return == ONLINE_SUCCESS || Return == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::FindSessions(const FUniqueNetId& SearchingPlayerId, const TSharedRef<FOnlineSessionSearch>& SearchSettings)
@@ -656,11 +663,11 @@ bool FOnlineSessionDrift::FindSessionById(const FUniqueNetId& SearchingUserId, c
 
 bool FOnlineSessionDrift::CancelFindSessions()
 {
-    uint32 Return = E_FAIL;
+    uint32 Return = ONLINE_FAIL;
     if (CurrentSessionSearch.IsValid() && CurrentSessionSearch->SearchState == EOnlineAsyncTaskState::InProgress)
     {
         // Make sure it's the right type
-        Return = ERROR_SUCCESS;
+        Return = ONLINE_SUCCESS;
 
         CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
         CurrentSessionSearch = nullptr;
@@ -670,12 +677,12 @@ bool FOnlineSessionDrift::CancelFindSessions()
         UE_LOG_ONLINE(Warning, TEXT("Can't cancel a search that isn't in progress"));
     }
 
-    if (Return != ERROR_IO_PENDING)
+    if (Return != ONLINE_IO_PENDING)
     {
         TriggerOnCancelFindSessionsCompleteDelegates(true);
     }
 
-    return Return == ERROR_SUCCESS || Return == ERROR_IO_PENDING;
+    return Return == ONLINE_SUCCESS || Return == ONLINE_IO_PENDING;
 }
 
 void FOnlineSessionDrift::OnGotActiveMatches(bool success)
@@ -726,7 +733,7 @@ FOnlineSessionDrift::~FOnlineSessionDrift()
 
 bool FOnlineSessionDrift::JoinSession(int32 PlayerNum, FName SessionName, const FOnlineSessionSearchResult& DesiredSession)
 {
-    uint32 Return = E_FAIL;
+    uint32 Return = ONLINE_FAIL;
     auto Session = GetNamedSession(SessionName);
     if (Session == nullptr)
     {
@@ -746,20 +753,20 @@ bool FOnlineSessionDrift::JoinSession(int32 PlayerNum, FName SessionName, const 
         }
 
         RegisterLocalPlayers(Session);
-        Return = ERROR_SUCCESS;
+        Return = ONLINE_SUCCESS;
     }
     else
     {
         UE_LOG_ONLINE(Warning, TEXT("Session (%s) already exists, can't join twice"), *SessionName.ToString());
     }
 
-    if (Return != ERROR_IO_PENDING)
+    if (Return != ONLINE_IO_PENDING)
     {
         // Just trigger the delegate as having failed
-        TriggerOnJoinSessionCompleteDelegates(SessionName, Return == ERROR_SUCCESS ? EOnJoinSessionCompleteResult::Success : EOnJoinSessionCompleteResult::UnknownError);
+        TriggerOnJoinSessionCompleteDelegates(SessionName, Return == ONLINE_SUCCESS ? EOnJoinSessionCompleteResult::Success : EOnJoinSessionCompleteResult::UnknownError);
     }
 
-    return Return == ERROR_SUCCESS || Return == ERROR_IO_PENDING;
+    return Return == ONLINE_SUCCESS || Return == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::JoinSession(const FUniqueNetId& PlayerId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession)
@@ -871,7 +878,7 @@ bool FOnlineSessionDrift::GetResolvedConnectString(const class FOnlineSessionSea
         TSharedPtr<FOnlineSessionInfoDrift> SessionInfo = StaticCastSharedPtr<FOnlineSessionInfoDrift>(SearchResult.Session.SessionInfo);
         bSuccess = GetConnectStringFromSessionInfo(SessionInfo, ConnectInfo);
     }
-    
+
     if (!bSuccess || ConnectInfo.IsEmpty())
     {
         UE_LOG_ONLINE(Warning, TEXT("Invalid session info in search result to GetResolvedConnectString()"));
@@ -880,7 +887,7 @@ bool FOnlineSessionDrift::GetResolvedConnectString(const class FOnlineSessionSea
     return bSuccess;
 }
 
-FOnlineSessionSettings* FOnlineSessionDrift::GetSessionSettings(FName SessionName) 
+FOnlineSessionSettings* FOnlineSessionDrift::GetSessionSettings(FName SessionName)
 {
     FNamedOnlineSession* Session = GetNamedSession(SessionName);
     if (Session)
@@ -994,7 +1001,7 @@ bool FOnlineSessionDrift::RegisterPlayers(FName SessionName, const TArray<TShare
             {
                 RegisterVoice(*PlayerId);
                 UE_LOG_ONLINE(Log, TEXT("Player %s already registered in session %s"), *PlayerId->ToDebugString(), *SessionName.ToString());
-            }            
+            }
         }
     }
     else

@@ -10,26 +10,28 @@
 * level directory of this module, and at https://mit-license.org/
 */
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OnlineSubsystemDrift : ModuleRules
 {
 	public OnlineSubsystemDrift(ReadOnlyTargetRules TargetRules) : base(TargetRules)
     {
-		PCHUsage = PCHUsageMode.NoSharedPCHs;
+		bFasterWithoutUnity = true;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
-		Definitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
+		PublicDefinitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
 
         PublicIncludePaths.AddRange(
             new string[] {
-                "OnlineSubsystemDrift/Public",
+                Path.Combine(ModuleDirectory, "Public"),
             }
             );
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                "OnlineSubsystemDrift/Private",
+                Path.Combine(ModuleDirectory, "Private"),
             }
             );
 

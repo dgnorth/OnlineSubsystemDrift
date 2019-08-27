@@ -1,10 +1,12 @@
-// Copyright 2016-2017 Directive Games Limited - All Rights Reserved.
+// Copyright 2016-2019 Directive Games Limited - All Rights Reserved.
 
-#include "OnlineSubsystemDriftPrivatePCH.h"
+
 #include "OnlineIdentityDrift.h"
+
 #include "OnlineSubsystemDrift.h"
 
 #include "DriftAPI.h"
+
 
 bool FUserOnlineAccountDrift::GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const
 {

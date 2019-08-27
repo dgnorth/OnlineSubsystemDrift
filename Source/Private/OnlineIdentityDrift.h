@@ -1,7 +1,7 @@
 // Copyright 2016-2017 Directive Games Limited - All Rights Reserved.
 
 #pragma once
- 
+
 #include "OnlineSubsystemDriftTypes.h"
 #include "OnlineIdentityInterface.h"
 #include "DriftAPI.h"
@@ -14,7 +14,7 @@ class FUserOnlineAccountDrift : public FUserOnlineAccount
 public:
 
     // FOnlineUser
-    
+
     virtual TSharedRef<const FUniqueNetId> GetUserId() const override { return UserIdPtr; }
     virtual FString GetRealName() const override { return TEXT("DummyRealName"); }
     virtual FString GetDisplayName(const FString& Platform = FString()) const override  { return Name; }
@@ -54,23 +54,23 @@ public:
 
     // IOnlineIdentity
 
-    virtual bool Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials) override;
-    virtual bool Logout(int32 LocalUserNum) override;
-    virtual bool AutoLogin(int32 LocalUserNum) override;
-    virtual TSharedPtr<FUserOnlineAccount> GetUserAccount(const FUniqueNetId& UserId) const override;
-    virtual TArray<TSharedPtr<FUserOnlineAccount> > GetAllUserAccounts() const override;
-    virtual TSharedPtr<const FUniqueNetId> GetUniquePlayerId(int32 LocalUserNum) const override;
-    virtual TSharedPtr<const FUniqueNetId> CreateUniquePlayerId(uint8* Bytes, int32 Size) override;
-    virtual TSharedPtr<const FUniqueNetId> CreateUniquePlayerId(const FString& Str) override;
-    virtual ELoginStatus::Type GetLoginStatus(int32 LocalUserNum) const override;
-    virtual ELoginStatus::Type GetLoginStatus(const FUniqueNetId& UserId) const override;
-    virtual FString GetPlayerNickname(int32 LocalUserNum) const override;
-    virtual FString GetPlayerNickname(const FUniqueNetId& UserId) const override;
-    virtual FString GetAuthToken(int32 LocalUserNum) const override;
-    virtual void RevokeAuthToken(const FUniqueNetId& UserId, const FOnRevokeAuthTokenCompleteDelegate& Delegate) override;
-    virtual void GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate) override;
-    virtual FPlatformUserId GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const override;
-    virtual FString GetAuthType() const override;
+    bool Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials) override;
+    bool Logout(int32 LocalUserNum) override;
+    bool AutoLogin(int32 LocalUserNum) override;
+    TSharedPtr<FUserOnlineAccount> GetUserAccount(const FUniqueNetId& UserId) const override;
+    TArray<TSharedPtr<FUserOnlineAccount> > GetAllUserAccounts() const override;
+    TSharedPtr<const FUniqueNetId> GetUniquePlayerId(int32 LocalUserNum) const override;
+    TSharedPtr<const FUniqueNetId> CreateUniquePlayerId(uint8* Bytes, int32 Size) override;
+    TSharedPtr<const FUniqueNetId> CreateUniquePlayerId(const FString& Str) override;
+    ELoginStatus::Type GetLoginStatus(int32 LocalUserNum) const override;
+    ELoginStatus::Type GetLoginStatus(const FUniqueNetId& UserId) const override;
+    FString GetPlayerNickname(int32 LocalUserNum) const override;
+    FString GetPlayerNickname(const FUniqueNetId& UserId) const override;
+    FString GetAuthToken(int32 LocalUserNum) const override;
+	void RevokeAuthToken(const FUniqueNetId& LocalUserId, const FOnRevokeAuthTokenCompleteDelegate& Delegate) override;
+	void GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate) override;
+    FPlatformUserId GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const override;
+    FString GetAuthType() const override;
 
     // FOnlineIdentityDrift
 
@@ -103,9 +103,9 @@ private:
 
     /** Ids mapped to locally registered users */
     TMap<FUniqueNetIdDrift, TSharedRef<FUserOnlineAccountDrift>> UserAccounts;
-    
+
     FOnlineSubsystemDrift* DriftSubsystem;
-    
+
     FDelegateHandle onAuthenticatedHandle;
     FDelegateHandle onServerRegisteredHandle;
 };

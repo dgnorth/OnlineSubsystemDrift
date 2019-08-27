@@ -69,8 +69,11 @@ PACKAGE_SCOPE:
 	{};
 
 	// IOnlineVoice
-	virtual bool Init() override;
+	IVoiceEnginePtr CreateVoiceEngine() override;
 	void ProcessMuteChangeNotification() override;
+
+public:
+	virtual bool Init() override;
 
 	/**
 	 * Cleanup voice interface
