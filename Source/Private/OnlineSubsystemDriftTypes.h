@@ -114,6 +114,11 @@ public:
     : driftId_(FCString::Atoi(*Str))
     {
     }
+	
+	FName GetType() const override
+	{
+		return DRIFT_SUBSYSTEM;
+	}
 
     const uint8* GetBytes() const override
     {
