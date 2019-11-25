@@ -3,7 +3,7 @@
 #pragma once
 
 #include "OnlineSubsystemDriftTypes.h"
-#include "OnlineIdentityInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 #include "DriftAPI.h"
 
 /**

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VoiceDataCommon.h"
+#include "Net/VoiceDataCommon.h"
 #include "OnlineSubsystemDriftPackage.h"
 
 class FUniqueNetId;

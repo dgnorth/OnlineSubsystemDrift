@@ -4,8 +4,8 @@
 
 #include "OnlineSubsystem.h"
 #include "VoiceEngineDrift.h"
-#include "OnlineIdentityInterface.h"
-#include "OnlineSessionInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "Voice.h"
 #include "Templates/SharedPointer.h"
 

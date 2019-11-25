@@ -3,7 +3,7 @@
 #include "OnlineSubsystemDriftPrivate.h"
 
 #include "OnlineSubsystemDrift.h"
-#include "ModuleManager.h"
+#include "Modules/ModuleManager.h"
 
 IMPLEMENT_MODULE(FOnlineSubsystemDriftModule, OnlineSubsystemDrift);
 

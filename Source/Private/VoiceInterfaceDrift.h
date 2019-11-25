@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VoiceInterface.h"
+#include "Interfaces/VoiceInterface.h"
 #include "VoicePacketDrift.h"
 #include "OnlineSubsystemDriftTypes.h"
 #include "OnlineSubsystemDriftPackage.h"

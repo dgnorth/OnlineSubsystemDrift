@@ -3,14 +3,14 @@
 
 #include "OnlineSessionDrift.h"
 
-#include "OnlineIdentityInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 #include "OnlineSubsystemDrift.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineAsyncTaskManagerDrift.h"
 
 #include "DriftAPI.h"
 
-#include "VoiceInterface.h"
+#include "Interfaces/VoiceInterface.h"
 
 
 FOnlineSessionInfoDrift::FOnlineSessionInfoDrift()
