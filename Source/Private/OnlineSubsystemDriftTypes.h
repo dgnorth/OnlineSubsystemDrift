@@ -4,6 +4,7 @@
 
 #include "OnlineSubsystemTypes.h"
 #include "IPAddress.h"
+#include "OnlineSubsystemDrift.h"
 
 class FOnlineSubsystemDrift;
 
