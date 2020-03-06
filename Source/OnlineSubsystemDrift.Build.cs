@@ -17,7 +17,12 @@ public class OnlineSubsystemDrift : ModuleRules
 {
 	public OnlineSubsystemDrift(ReadOnlyTargetRules TargetRules) : base(TargetRules)
     {
+#if UE_4_24_OR_LATER
+		bUseUnity = false;
+#else
 		bFasterWithoutUnity = true;
+#endif
+
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicDefinitions.Add("ONLINESUBSYSTEMDRIFT_PACKAGE=1");
