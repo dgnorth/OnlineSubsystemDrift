@@ -11,6 +11,11 @@
 #include "OnlineSubsystemUtils.h"
 
 
+#ifndef DEFAULT_NUM_VOICE_CHANNELS
+#define DEFAULT_NUM_VOICE_CHANNELS 1
+#endif
+
+
 /** Largest size preallocated for compressed data */
 #define MAX_COMPRESSED_VOICE_BUFFER_SIZE 8 * 1024
 /** Largest size preallocated for uncompressed data */
