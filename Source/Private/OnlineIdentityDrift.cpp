@@ -96,11 +96,11 @@ void FOnlineIdentityDrift::OnAuthenticated(bool success, const FPlayerAuthentica
     {
         FUniqueNetIdDrift* NewUserId = new FUniqueNetIdDrift(info.playerId);
         TSharedRef<FUserOnlineAccountDrift> UserAccountRef(new FUserOnlineAccountDrift(MakeShareable(NewUserId), info.playerName));
-        
+
         UserAccounts.Add(static_cast<FUniqueNetIdDrift>(*UserAccountRef->GetUserId()), UserAccountRef);
-        
+
         UserIds.Add(LocalUserNum, UserAccountRef->GetUserId());
-        
+
         TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountRef->GetUserId(), *ErrorStr);
         TriggerOnLoginStatusChangedDelegates(LocalUserNum, ELoginStatus::NotLoggedIn, ELoginStatus::LoggedIn, *UserAccountRef->GetUserId());
         return;
@@ -109,7 +109,7 @@ void FOnlineIdentityDrift::OnAuthenticated(bool success, const FPlayerAuthentica
     {
         ErrorStr = info.error;
     }
-    
+
     if (!ErrorStr.IsEmpty())
     {
         UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *info.error);
@@ -129,6 +129,26 @@ void FOnlineIdentityDrift::OnServerRegistered(bool success)
 
     UE_LOG_ONLINE(Warning, TEXT("Server registration failed"));
     TriggerOnLoginCompleteDelegates(0, false, FUniqueNetIdDrift{}, TEXT("Unknown failure"));
+}
+
+
+void FOnlineIdentityDrift::OnPlayerNameSet(bool success)
+{
+	if (success)
+	{
+		const TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(0);
+		if (UserId.IsValid())
+		{
+			const auto UserAccount = UserAccounts.Find(FUniqueNetIdDrift(*UserId));
+			if (UserAccount != nullptr)
+			{
+			    if (auto Drift = DriftSubsystem->GetDrift())
+			    {
+				    UserAccount->Get().Name = Drift->GetPlayerName();
+			    }
+			}
+		}
+	}
 }
 
 
@@ -163,7 +183,7 @@ bool FOnlineIdentityDrift::AutoLogin(int32 LocalUserNum)
         }
         return false;
     }
-    
+
     FString Type, ID, Token;
 
     return Login(LocalUserNum, FOnlineAccountCredentials{Type, ID, Token});
@@ -194,12 +214,12 @@ TSharedPtr<FUserOnlineAccount> FOnlineIdentityDrift::GetUserAccount(const FUniqu
 TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityDrift::GetAllUserAccounts() const
 {
     TArray<TSharedPtr<FUserOnlineAccount> > Result;
-    
+
     for (TMap<FUniqueNetIdDrift, TSharedRef<FUserOnlineAccountDrift>>::TConstIterator It(UserAccounts); It; ++It)
     {
         Result.Add(It.Value());
     }
-    
+
     return Result;
 }
 
@@ -236,7 +256,7 @@ ELoginStatus::Type FOnlineIdentityDrift::GetLoginStatus(int32 LocalUserNum) cons
     return ELoginStatus::NotLoggedIn;
 }
 
-ELoginStatus::Type FOnlineIdentityDrift::GetLoginStatus(const FUniqueNetId& UserId) const 
+ELoginStatus::Type FOnlineIdentityDrift::GetLoginStatus(const FUniqueNetId& UserId) const
 {
     return GetLoginStatus(0);
 }
@@ -282,6 +302,7 @@ FOnlineIdentityDrift::FOnlineIdentityDrift(class FOnlineSubsystemDrift* InSubsys
     {
         onAuthenticatedHandle = Drift->OnPlayerAuthenticated().AddRaw(this, &FOnlineIdentityDrift::OnAuthenticated);
         onServerRegisteredHandle = Drift->OnServerRegistered().AddRaw(this, &FOnlineIdentityDrift::OnServerRegistered);
+    	onPlayerNameSetHandle = Drift->OnPlayerNameSet().AddRaw(this, &FOnlineIdentityDrift::OnPlayerNameSet);
     }
 }
 
@@ -298,6 +319,9 @@ FOnlineIdentityDrift::~FOnlineIdentityDrift()
 
         Drift->OnPlayerAuthenticated().Remove(onAuthenticatedHandle);
         onAuthenticatedHandle.Reset();
+
+    	Drift->OnPlayerNameSet().Remove(onPlayerNameSetHandle);
+    	onPlayerNameSetHandle.Reset();
     }
 }
 

@@ -97,6 +97,7 @@ private:
 
     void OnAuthenticated(bool success, const FPlayerAuthenticatedInfo& info);
     void OnServerRegistered(bool success);
+	void OnPlayerNameSet(bool success);
 
     /** Ids mapped to locally registered users */
     TMap<int32, TSharedPtr<const FUniqueNetId>> UserIds;
@@ -108,6 +109,7 @@ private:
 
     FDelegateHandle onAuthenticatedHandle;
     FDelegateHandle onServerRegisteredHandle;
+	FDelegateHandle onPlayerNameSetHandle;
 };
 
 typedef TSharedPtr<FOnlineIdentityDrift, ESPMode::ThreadSafe> FOnlineIdentityNullPtr;
