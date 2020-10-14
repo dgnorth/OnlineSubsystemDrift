@@ -341,10 +341,6 @@ bool FOnlineSessionDrift::StartSession(FName SessionName)
                 {
                     if (syncStat->serverUpdated.IsSet() && syncStat->matchUpdated.IsSet())
                     {
-                        if (auto session = GetNamedSession(SessionName))
-                        {
-                            session->SessionState = EOnlineSessionState::Ended;
-                        }
                         const auto success = syncStat->serverUpdated.GetValue() && syncStat->matchUpdated.GetValue();
                         TriggerOnStartSessionCompleteDelegates(SessionName, success);
                     }
@@ -409,7 +405,6 @@ bool FOnlineSessionDrift::EndSession(FName SessionName)
         // Can't end a match that isn't in progress
         if (Session->SessionState == EOnlineSessionState::InProgress)
         {
-            Session->SessionState = EOnlineSessionState::Ended;
             if (IsRunningDedicatedServer())
             {
                 if (auto Drift = DriftSubsystem->GetDrift())
