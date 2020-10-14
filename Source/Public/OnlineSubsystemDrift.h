@@ -11,7 +11,7 @@ typedef TSharedPtr<class FOnlineProfileDrift, ESPMode::ThreadSafe> FOnlineProfil
 typedef TSharedPtr<class FOnlineFriendsDrift, ESPMode::ThreadSafe> FOnlineFriendsDriftPtr;
 typedef TSharedPtr<class FOnlineUserCloudDrift, ESPMode::ThreadSafe> FOnlineUserCloudDriftPtr;
 typedef TSharedPtr<class FOnlineLeaderboardsDrift, ESPMode::ThreadSafe> FOnlineLeaderboardsDriftPtr;
-typedef TSharedPtr<class FOnlineVoiceDrift, ESPMode::ThreadSafe> FOnlineVoiceDriftPtr;
+typedef TSharedPtr<class FOnlineVoiceImpl, ESPMode::ThreadSafe> FOnlineVoiceImplPtr;
 typedef TSharedPtr<class FOnlineExternalUIDrift, ESPMode::ThreadSafe> FOnlineExternalUIDriftPtr;
 typedef TSharedPtr<class FOnlineIdentityDrift, ESPMode::ThreadSafe> FOnlineIdentityDriftPtr;
 typedef TSharedPtr<class FOnlineAchievementsDrift, ESPMode::ThreadSafe> FOnlineAchievementsDriftPtr;
@@ -104,7 +104,7 @@ private:
     FOnlineSessionDriftPtr SessionInterface;
 
     /** Interface for voice communication */
-    mutable FOnlineVoiceDriftPtr VoiceInterface;
+    mutable FOnlineVoiceImplPtr VoiceInterface;
 
     /** Interface for voice communication */
     mutable bool bVoiceInterfaceInitialized;
