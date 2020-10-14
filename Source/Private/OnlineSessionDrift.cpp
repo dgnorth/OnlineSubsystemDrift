@@ -329,8 +329,38 @@ bool FOnlineSessionDrift::StartSession(FName SessionName)
             Session->SessionState = EOnlineSessionState::InProgress;
             if (auto Drift = DriftSubsystem->GetDrift())
             {
-                Drift->UpdateServer(TEXT("running"), TEXT(""), FDriftServerStatusUpdatedDelegate{});
-                Drift->UpdateMatch(TEXT("started"), TEXT(""), FDriftMatchStatusUpdatedDelegate{});
+                struct FSessionUpdateSync
+                {
+                    TOptional<bool> serverUpdated;
+                    TOptional<bool> matchUpdated;
+                };
+
+                TSharedPtr<FSessionUpdateSync> sync = MakeShared<FSessionUpdateSync>();
+                TFunction<void(const TSharedPtr<FSessionUpdateSync>& syncStat)> OnDriftStatusUpdated
+                    = [this, SessionName](const TSharedPtr<FSessionUpdateSync>& syncStat) 
+                {
+                    if (syncStat->serverUpdated.IsSet() && syncStat->matchUpdated.IsSet())
+                    {
+                        if (auto session = GetNamedSession(SessionName))
+                        {
+                            session->SessionState = EOnlineSessionState::Ended;
+                        }
+                        const auto success = syncStat->serverUpdated.GetValue() && syncStat->matchUpdated.GetValue();
+                        TriggerOnStartSessionCompleteDelegates(SessionName, success);
+                    }
+                };
+
+                Drift->UpdateServer(TEXT("running"), TEXT(""), FDriftServerStatusUpdatedDelegate::CreateLambda([this, SessionName, sync, OnDriftStatusUpdated](bool success)
+                {
+                    sync->serverUpdated = success;
+                    OnDriftStatusUpdated(sync);
+                }));
+                Drift->UpdateMatch(TEXT("started"), TEXT(""), FDriftMatchStatusUpdatedDelegate::CreateLambda([this, SessionName, sync, OnDriftStatusUpdated](bool success)
+                {
+                    sync->matchUpdated = success;
+                    OnDriftStatusUpdated(sync);
+                }));
+                Result = ONLINE_IO_PENDING;
             }
         }
         else
@@ -384,7 +414,15 @@ bool FOnlineSessionDrift::EndSession(FName SessionName)
             {
                 if (auto Drift = DriftSubsystem->GetDrift())
                 {
-                    Drift->UpdateMatch(TEXT("ended"), TEXT(""), FDriftMatchStatusUpdatedDelegate{});
+                    Drift->UpdateMatch(TEXT("ended"), TEXT(""), FDriftMatchStatusUpdatedDelegate::CreateLambda([this, SessionName](bool success)
+                    {
+                        if (auto session = GetNamedSession(SessionName))
+                        {
+                            session->SessionState = EOnlineSessionState::Ended;
+                        }
+                        TriggerOnEndSessionCompleteDelegates(SessionName, success); 
+                    }));
+                    Result = ONLINE_IO_PENDING;
                 }
             }
         }
