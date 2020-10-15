@@ -11,7 +11,7 @@ class FOnlineSubsystemDrift;
 /**
 * Implementation of session information
 */
-class FOnlineSessionInfoDrift : public FOnlineSessionInfo
+class ONLINESUBSYSTEMDRIFT_API FOnlineSessionInfoDrift : public FOnlineSessionInfo
 {
 protected:
 
