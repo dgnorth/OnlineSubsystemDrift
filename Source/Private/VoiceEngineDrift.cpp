@@ -130,7 +130,7 @@ bool FVoiceEngineDrift::Init(int32 MaxLocalTalkers, int32 MaxRemoteTalkers)
 			FVoiceModule& VoiceModule = FVoiceModule::Get();
 			if (VoiceModule.IsVoiceEnabled())
 			{
-				VoiceCapture = VoiceModule.CreateVoiceCapture();
+				VoiceCapture = VoiceModule.CreateVoiceCapture(TEXT(""));
 				VoiceEncoder = VoiceModule.CreateVoiceEncoder();
 
 				bSuccess = VoiceCapture.IsValid() && VoiceEncoder.IsValid();
