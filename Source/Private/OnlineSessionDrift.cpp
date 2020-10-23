@@ -387,29 +387,29 @@ bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSetting
     auto Session = GetNamedSession(SessionName);
     if (Session)
     {
-    	if (auto Drift = DriftSubsystem->GetDrift())
-    	{
-    		FDriftUpdateMatchProperties Properties{};
-    		FString mapName;
-    		if (Session->SessionSettings.Get(TEXT("map_name"), mapName))
-    		{
-    			Properties.mapName = mapName;
-    		}
-    		FString gameMode;
-    		if (Session->SessionSettings.Get(TEXT("game_mode"), gameMode))
-    		{
-    			Properties.gameMode = gameMode;
-    		}
-    		if (Session->SessionSettings.NumPublicConnections != UpdatedSessionSettings.NumPublicConnections)
-    		{
-    			Properties.maxPlayers = UpdatedSessionSettings.NumPublicConnections;
-    		}
-    		Drift->UpdateMatch(Properties, FDriftMatchStatusUpdatedDelegate::CreateLambda([this, SessionName](bool success)
-    		{
-		        TriggerOnUpdateSessionCompleteDelegates(SessionName, success);
-    		}));
+        if (auto Drift = DriftSubsystem->GetDrift())
+        {
+            FDriftUpdateMatchProperties Properties{};
+            FString mapName;
+            if (UpdatedSessionSettings.Get(TEXT("map_name"), mapName))
+            {
+                Properties.mapName = mapName;
+            }
+            FString gameMode;
+            if (UpdatedSessionSettings.Get(TEXT("game_mode"), gameMode))
+            {
+                Properties.gameMode = gameMode;
+            }
+            if (Session->SessionSettings.NumPublicConnections != UpdatedSessionSettings.NumPublicConnections)
+            {
+                Properties.maxPlayers = UpdatedSessionSettings.NumPublicConnections;
+            }
+            Drift->UpdateMatch(Properties, FDriftMatchStatusUpdatedDelegate::CreateLambda([this, SessionName](bool success)
+            {
+                TriggerOnUpdateSessionCompleteDelegates(SessionName, success);
+            }));
             Result = ONLINE_IO_PENDING;
-    	}
+        }
         Session->SessionSettings = UpdatedSessionSettings;
     }
     else
@@ -422,7 +422,7 @@ bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSetting
         TriggerOnUpdateSessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
     }
 
-	return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
+    return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::EndSession(FName SessionName)
