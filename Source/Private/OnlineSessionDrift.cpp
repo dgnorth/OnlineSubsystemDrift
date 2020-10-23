@@ -776,6 +776,7 @@ void FOnlineSessionDrift::OnGotActiveMatches(bool success)
                 SessionSettings.NumPrivateConnections = 0;
                 SessionSettings.NumPublicConnections = activeMatch.max_players - activeMatch.num_players;
                 SessionSettings.Set(TEXT("match_id"), activeMatch.match_id, EOnlineDataAdvertisementType::Type::DontAdvertise);
+                SessionSettings.Set(TEXT("map_name"), activeMatch.map_name, EOnlineDataAdvertisementType::Type::DontAdvertise);
             }
             CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Done;
             CurrentSessionSearch.Reset();
