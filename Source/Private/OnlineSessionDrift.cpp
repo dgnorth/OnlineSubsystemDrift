@@ -404,6 +404,11 @@ bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSetting
             {
                 Properties.gameMode = gameMode;
             }
+            FString uniqueKey;
+            if (UpdatedSessionSettings.Get(TEXT("unique_key"), uniqueKey) && !uniqueKey.IsEmpty())
+            {
+                Properties.uniqueKey = uniqueKey;
+            }
             if (Session->SessionSettings.NumPublicConnections != UpdatedSessionSettings.NumPublicConnections)
             {
                 Properties.maxPlayers = UpdatedSessionSettings.NumPublicConnections;
