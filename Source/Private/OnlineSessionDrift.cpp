@@ -255,6 +255,10 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
 
         if (auto Drift = DriftSubsystem->GetDrift())
         {
+            if (onMatchAddedDelegateHandle.IsValid())
+            {
+                Drift->OnGotActiveMatches().Remove(onMatchAddedDelegateHandle);
+            }
             onMatchAddedDelegateHandle = Drift->OnMatchAdded().AddRaw(this, &FOnlineSessionDrift::OnMatchAdded);
             FString mapName;
             Session->SessionSettings.Get(TEXT("map_name"), mapName);
@@ -690,7 +694,11 @@ bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRe
 
         if (auto drift = DriftSubsystem->GetDrift())
         {
-            drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
+            if (onFindSessionDelegateHandle.IsValid())
+            {
+                drift->OnGotActiveMatches().Remove(onFindSessionDelegateHandle);
+            }
+            onFindSessionDelegateHandle = drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
             DriftSearch = MakeShareable(new FMatchesSearch{});
             auto temp = DriftSearch.ToSharedRef();
             drift->GetActiveMatches(temp);
