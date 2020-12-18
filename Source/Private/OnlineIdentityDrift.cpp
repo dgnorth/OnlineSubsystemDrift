@@ -132,7 +132,7 @@ void FOnlineIdentityDrift::OnServerRegistered(bool success)
 }
 
 
-void FOnlineIdentityDrift::OnPlayerNameSet(bool success)
+void FOnlineIdentityDrift::OnPlayerNameSet(bool success, const FString& name)
 {
 	if (success)
 	{
