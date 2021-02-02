@@ -18,7 +18,7 @@
 #include "OnlineLeaderboardInterfaceDrift.h"
  */
 #include "OnlineIdentityDrift.h"
-#include "VoiceInterfaceDrift.h"
+#include "VoiceInterfaceImpl.h"
 /*
 #include "OnlineAchievementsInterfaceDrift.h"
 */
@@ -200,7 +200,7 @@ bool FOnlineSubsystemDrift::Init()
 //        LeaderboardsInterface = MakeShareable(new FOnlineLeaderboardsDrift(this));
         IdentityInterface = MakeShareable(new FOnlineIdentityDrift(this));
 //        AchievementsInterface = MakeShareable(new FOnlineAchievementsDrift(this));
-        VoiceInterface = MakeShareable(new FOnlineVoiceDrift(this));
+        VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
     }
     else
     {

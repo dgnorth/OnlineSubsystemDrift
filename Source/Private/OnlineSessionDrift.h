@@ -72,6 +72,7 @@ PACKAGE_SCOPE:
     TSharedPtr<FMatchQueueSearch> CurrentSearch;
 
     FDelegateHandle onMatchAddedDelegateHandle;
+    FDelegateHandle onFindSessionDelegateHandle;
 
     FOnlineSessionDrift(class FOnlineSubsystemDrift* InSubsystem) :
         DriftSubsystem(InSubsystem),

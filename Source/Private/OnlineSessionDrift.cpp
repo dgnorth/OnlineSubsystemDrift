@@ -255,6 +255,10 @@ bool FOnlineSessionDrift::CreateSession(int32 HostingPlayerNum, FName SessionNam
 
         if (auto Drift = DriftSubsystem->GetDrift())
         {
+            if (onMatchAddedDelegateHandle.IsValid())
+            {
+                Drift->OnGotActiveMatches().Remove(onMatchAddedDelegateHandle);
+            }
             onMatchAddedDelegateHandle = Drift->OnMatchAdded().AddRaw(this, &FOnlineSessionDrift::OnMatchAdded);
             FString mapName;
             Session->SessionSettings.Get(TEXT("map_name"), mapName);
@@ -382,17 +386,52 @@ bool FOnlineSessionDrift::StartSession(FName SessionName)
 
 bool FOnlineSessionDrift::UpdateSession(FName SessionName, FOnlineSessionSettings& UpdatedSessionSettings, bool bShouldRefreshOnlineData)
 {
-    bool bWasSuccessful = true;
+    uint32 Result = ONLINE_FAIL;
 
     auto Session = GetNamedSession(SessionName);
     if (Session)
     {
-        // TODO: What should this do?
+        if (auto Drift = DriftSubsystem->GetDrift())
+        {
+            FDriftUpdateMatchProperties Properties{};
+            FString mapName;
+            if (UpdatedSessionSettings.Get(TEXT("map_name"), mapName))
+            {
+                Properties.mapName = mapName;
+            }
+            FString gameMode;
+            if (UpdatedSessionSettings.Get(TEXT("game_mode"), gameMode))
+            {
+                Properties.gameMode = gameMode;
+            }
+            FString uniqueKey;
+            if (UpdatedSessionSettings.Get(TEXT("unique_key"), uniqueKey) && !uniqueKey.IsEmpty())
+            {
+                Properties.uniqueKey = uniqueKey;
+            }
+            if (Session->SessionSettings.NumPublicConnections != UpdatedSessionSettings.NumPublicConnections)
+            {
+                Properties.maxPlayers = UpdatedSessionSettings.NumPublicConnections;
+            }
+            Drift->UpdateMatch(Properties, FDriftMatchStatusUpdatedDelegate::CreateLambda([this, SessionName](bool success)
+            {
+                TriggerOnUpdateSessionCompleteDelegates(SessionName, success);
+            }));
+            Result = ONLINE_IO_PENDING;
+        }
         Session->SessionSettings = UpdatedSessionSettings;
-        TriggerOnUpdateSessionCompleteDelegates(SessionName, bWasSuccessful);
+    }
+    else
+    {
+        UE_LOG_ONLINE(Warning, TEXT("Can't update an online game for session (%s) that hasn't been created"), *SessionName.ToString());
     }
 
-    return bWasSuccessful;
+    if (Result != ONLINE_IO_PENDING)
+    {
+        TriggerOnUpdateSessionCompleteDelegates(SessionName, (Result == ONLINE_SUCCESS) ? true : false);
+    }
+
+    return Result == ONLINE_SUCCESS || Result == ONLINE_IO_PENDING;
 }
 
 bool FOnlineSessionDrift::EndSession(FName SessionName)
@@ -660,7 +699,11 @@ bool FOnlineSessionDrift::FindSessions(int32 SearchingPlayerNum, const TSharedRe
 
         if (auto drift = DriftSubsystem->GetDrift())
         {
-            drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
+            if (onFindSessionDelegateHandle.IsValid())
+            {
+                drift->OnGotActiveMatches().Remove(onFindSessionDelegateHandle);
+            }
+            onFindSessionDelegateHandle = drift->OnGotActiveMatches().AddRaw(this, &FOnlineSessionDrift::OnGotActiveMatches);
             DriftSearch = MakeShareable(new FMatchesSearch{});
             auto temp = DriftSearch.ToSharedRef();
             drift->GetActiveMatches(temp);
@@ -746,6 +789,7 @@ void FOnlineSessionDrift::OnGotActiveMatches(bool success)
                 SessionSettings.NumPrivateConnections = 0;
                 SessionSettings.NumPublicConnections = activeMatch.max_players - activeMatch.num_players;
                 SessionSettings.Set(TEXT("match_id"), activeMatch.match_id, EOnlineDataAdvertisementType::Type::DontAdvertise);
+                SessionSettings.Set(TEXT("map_name"), activeMatch.map_name, EOnlineDataAdvertisementType::Type::DontAdvertise);
             }
             CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Done;
             CurrentSessionSearch.Reset();

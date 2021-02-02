@@ -97,7 +97,7 @@ private:
 
     void OnAuthenticated(bool success, const FPlayerAuthenticatedInfo& info);
     void OnServerRegistered(bool success);
-	void OnPlayerNameSet(bool success);
+	   void OnPlayerNameSet(bool success, const FString& name);
 
     /** Ids mapped to locally registered users */
     TMap<int32, TSharedPtr<const FUniqueNetId>> UserIds;
