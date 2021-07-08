@@ -58,6 +58,7 @@ public class OnlineSubsystemDrift : ModuleRules
                 "Voice",
                 "OnlineSubsystem",
                 "Drift",
+                "JsonArchive",
 			}
 			);
 	}
