@@ -373,7 +373,7 @@ uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalker
 
 	bool bAudioComponentCreated = false;
 	// Generate a streaming wave audio component for voice playback
-	if (QueuedData.AudioComponent == nullptr || QueuedData.AudioComponent->IsPendingKill())
+	if (!IsValid(QueuedData.AudioComponent))
 	{
 		if (SerializeHelper == nullptr)
 		{
@@ -442,7 +442,7 @@ void FVoiceEngineDrift::OnAudioFinished(UAudioComponent* AC)
 	for (FRemoteTalkerData::TIterator It(RemoteTalkerBuffers); It; ++It)
 	{
 		FRemoteTalkerDataDrift& RemoteData = It.Value();
-		if (RemoteData.AudioComponent->IsPendingKill() || AC == RemoteData.AudioComponent)
+		if (!IsValid(RemoteData.AudioComponent) || AC == RemoteData.AudioComponent)
 		{
 			UE_LOG(LogVoiceDecode, Log, TEXT("Removing VOIP AudioComponent for Id: %s"), *It.Key().ToDebugString());
 			RemoteData.AudioComponent = nullptr;

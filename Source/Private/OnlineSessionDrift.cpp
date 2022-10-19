@@ -306,7 +306,7 @@ bool FOnlineSessionDrift::CreateSession(const FUniqueNetId& HostingPlayerId, FNa
 
 void FOnlineSessionDrift::OnMatchAdded(bool success)
 {
-    auto Session = GetNamedSession(GameSessionName);
+    auto Session = GetNamedSession(NAME_GameSession);
     if (Session)
     {
         Session->SessionState = EOnlineSessionState::Pending;
@@ -316,7 +316,7 @@ void FOnlineSessionDrift::OnMatchAdded(bool success)
         Drift->OnMatchAdded().Remove(onMatchAddedDelegateHandle);
     }
     onMatchAddedDelegateHandle.Reset();
-    TriggerOnCreateSessionCompleteDelegates(GameSessionName, (Session != nullptr) && success);
+    TriggerOnCreateSessionCompleteDelegates(NAME_GameSession, (Session != nullptr) && success);
 }
 
 
