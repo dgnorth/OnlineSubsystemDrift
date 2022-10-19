@@ -334,11 +334,16 @@ FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUn
 {
     for (int i = 0; i < MAX_LOCAL_PLAYERS; ++i)
     {
-        auto CurrentUniqueId = GetUniquePlayerId(i);
-        if (CurrentUniqueId.IsValid() && (*CurrentUniqueId == UniqueNetId))
-        {
-            return i;
-        }
+		auto CurrentUniqueId = GetUniquePlayerId(i);
+		if (CurrentUniqueId.IsValid() && (*CurrentUniqueId == UniqueNetId))
+		{
+#if ENGINE_MAJOR_VERSION >= 5
+			return FPlatformMisc::GetPlatformUserForUserIndex(i);
+#else
+			return i;
+#endif
+		}
+        
     }
 
     return PLATFORMUSERID_NONE;
