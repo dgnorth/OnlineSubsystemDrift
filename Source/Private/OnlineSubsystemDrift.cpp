@@ -103,10 +103,12 @@ IOnlineTitleFilePtr FOnlineSubsystemDrift::GetTitleFileInterface() const
     return nullptr;
 }
 
+#if UE_VERSION_OLDER_THAN(5, 1, 0)
 IOnlineStorePtr FOnlineSubsystemDrift::GetStoreInterface() const
 {
-    return nullptr;
+	return nullptr;
 }
+#endif
 
 IOnlineEventsPtr FOnlineSubsystemDrift::GetEventsInterface() const
 {

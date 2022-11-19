@@ -5,6 +5,8 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemImpl.h"
 #include "OnlineSubsystemDriftPackage.h"
+#include "Misc/EngineVersionComparison.h"
+
 
 typedef TSharedPtr<class FOnlineSessionDrift, ESPMode::ThreadSafe> FOnlineSessionDriftPtr;
 typedef TSharedPtr<class FOnlineProfileDrift, ESPMode::ThreadSafe> FOnlineProfileDriftPtr;
@@ -49,7 +51,9 @@ public:
     IOnlineTimePtr GetTimeInterface() const override;
     IOnlineIdentityPtr GetIdentityInterface() const override;
     IOnlineTitleFilePtr GetTitleFileInterface() const override;
+#if UE_VERSION_OLDER_THAN(5, 1, 0)
     IOnlineStorePtr GetStoreInterface() const override;
+#endif
     IOnlineStoreV2Ptr GetStoreV2Interface() const override { return nullptr; }
     IOnlinePurchasePtr GetPurchaseInterface() const override { return nullptr; }
     IOnlineEventsPtr GetEventsInterface() const override;
