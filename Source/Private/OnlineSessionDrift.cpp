@@ -15,9 +15,9 @@
 
 FOnlineSessionInfoDrift::FOnlineSessionInfoDrift()
 #if ENGINE_MAJOR_VERSION >= 5
-: SessionId{ *FUniqueNetIdString::EmptyId() }
+: SessionId{ FUniqueNetIdString::EmptyId() }
 #else
-: SessionId{ TEXT("INVALID") }
+: SessionId{ MakeUnique<FUniqueNetIdString>(TEXT("INVALID")) }
 #endif
 {
 }
@@ -28,9 +28,9 @@ void FOnlineSessionInfoDrift::Init(const FOnlineSubsystemDrift& Subsystem)
     FPlatformMisc::CreateGuid(OwnerGuid);
 
 #if ENGINE_MAJOR_VERSION >= 5
-	SessionId = *FUniqueNetIdString::Create(OwnerGuid.ToString(), DRIFT_SUBSYSTEM);
+	SessionId = FUniqueNetIdString::Create(OwnerGuid.ToString(), DRIFT_SUBSYSTEM);
 #else
-    SessionId = FUniqueNetIdString(OwnerGuid.ToString());
+    SessionId = MakeUnique<FUniqueNetIdString>(OwnerGuid.ToString());
 #endif
 }
 

@@ -38,7 +38,7 @@ PACKAGE_SCOPE:
     void Init(const FOnlineSubsystemDrift& Subsystem);
 
     /** Unique Id for this session */
-    FUniqueNetIdString SessionId;
+	FUniqueNetIdStringPtr SessionId;
     
     /** Server URL */
     FString Url;
@@ -69,7 +69,7 @@ public:
 
     virtual FString ToString() const override
     {
-        return SessionId.ToString();
+        return SessionId.IsValid() ? SessionId->ToString() : FString();
     }
 
     virtual FString ToDebugString() const override
@@ -79,7 +79,7 @@ public:
 
     virtual const FUniqueNetId& GetSessionId() const override
     {
-        return SessionId;
+        return SessionId.IsValid() ? *SessionId.Get() : *FUniqueNetIdString::EmptyId();
     }
 };
 
