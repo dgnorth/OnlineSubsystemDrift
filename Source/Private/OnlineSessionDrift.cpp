@@ -12,6 +12,9 @@
 
 #include "Interfaces/VoiceInterface.h"
 
+#if !UE_VERSION_OLDER_THAN(5, 2, 0)
+#include "Online/OnlineBase.h"
+#endif
 
 FOnlineSessionInfoDrift::FOnlineSessionInfoDrift()
 #if ENGINE_MAJOR_VERSION >= 5

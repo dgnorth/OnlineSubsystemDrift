@@ -9,6 +9,11 @@
 #include "OnlineSubsystemDriftPackage.h"
 #include "OnlineSubsystemDriftPrivate.h"
 #include "Net/VoiceDataCommon.h"
+#include "Misc/EngineVersionComparison.h"
+
+#if !UE_VERSION_OLDER_THAN(5, 2, 0)
+#include "Online/OnlineBase.h"
+#endif
 
 
 /**
