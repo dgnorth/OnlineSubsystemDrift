@@ -121,14 +121,15 @@ void FOnlineIdentityDrift::OnAuthenticated(bool success, const FPlayerAuthentica
 
 void FOnlineIdentityDrift::OnServerRegistered(bool success)
 {
+	const auto NetId = MakeShared<FUniqueNetIdDrift>(FUniqueNetIdDrift{});
     if (success)
     {
-        TriggerOnLoginCompleteDelegates(0, true, FUniqueNetIdDrift{}, TEXT(""));
+        TriggerOnLoginCompleteDelegates(0, true, *NetId, TEXT(""));
         return;
     }
 
     UE_LOG_ONLINE(Warning, TEXT("Server registration failed"));
-    TriggerOnLoginCompleteDelegates(0, false, FUniqueNetIdDrift{}, TEXT("Unknown failure"));
+    TriggerOnLoginCompleteDelegates(0, false, *NetId, TEXT("Unknown failure"));
 }
 
 
@@ -343,7 +344,7 @@ FPlatformUserId FOnlineIdentityDrift::GetPlatformUserIdFromUniqueNetId(const FUn
 			return i;
 #endif
 		}
-        
+
     }
 
     return PLATFORMUSERID_NONE;
