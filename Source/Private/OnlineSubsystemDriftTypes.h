@@ -148,7 +148,7 @@ public:
     
     friend uint32 GetTypeHash(const FUniqueNetIdDrift& other)
     {
-        return ::PointerHash(&other.driftId_, sizeof(other.driftId_));
+        return other.driftId_;
     }
 
     uint32 GetId() const
