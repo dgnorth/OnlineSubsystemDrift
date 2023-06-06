@@ -88,7 +88,7 @@ class FVoiceEngineDrift : public IVoiceEngine
 	friend class FVoiceSerializeHelper;
 
 	/** Mapping of UniqueIds to the incoming voice data and their audio component */
-	typedef TMap<class FUniqueNetIdDrift, FRemoteTalkerDataDrift> FRemoteTalkerData;
+	typedef TMap<DriftID, FRemoteTalkerDataDrift> FRemoteTalkerData;
 
 	/** Reference to the main online subsystem */
 	class IOnlineSubsystem* OnlineSubsystem;
@@ -233,7 +233,7 @@ public:
 
 	virtual bool IsRemotePlayerTalking(const FUniqueNetId& UniqueId) override
 	{
-		return RemoteTalkerBuffers.Find((const FUniqueNetIdDrift&)UniqueId) != NULL;
+		return RemoteTalkerBuffers.Find(FUniqueNetIdDrift::ParseDriftId(UniqueId)) != NULL;
 	}
 
 	virtual uint32 GetVoiceDataReadyFlags() const override;

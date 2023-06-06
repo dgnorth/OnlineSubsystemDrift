@@ -294,8 +294,7 @@ bool FOnlineVoiceDrift::RegisterRemoteTalker(const FUniqueNetId& UniqueId)
 				int32 AddIndex = RemoteTalkers.AddZeroed();
 				Talker = &RemoteTalkers[AddIndex];
 				// Copy the UniqueId
-				const FUniqueNetIdDrift& UniqueIdStr = (const FUniqueNetIdDrift&)UniqueId;
-				Talker->TalkerId = MakeShareable(new FUniqueNetIdDrift(UniqueIdStr));
+				Talker->TalkerId = FUniqueNetIdDrift::Create(UniqueId);
 				// Register the remote talker locally
 				Return = VoiceEngine->RegisterRemoteTalker(UniqueId);
 				UE_LOG(LogVoice, Log, TEXT("RegisterRemoteTalker(%s) returned 0x%08X"),
@@ -418,7 +417,7 @@ bool FOnlineVoiceDrift::IsMuted(uint32 LocalUserNum, const FUniqueNetId& UniqueI
 	int32 Index = INDEX_NONE;
 	if (LocalUserNum >= 0 && LocalUserNum < (uint32)MaxLocalTalkers)
 	{
-		Index = SystemMuteList.Find((const FUniqueNetIdDrift&)UniqueId);
+		Index = SystemMuteList.Find(FUniqueNetIdDrift::ParseDriftId(UniqueId));
 	}
 
 	return Index != INDEX_NONE;
@@ -426,7 +425,7 @@ bool FOnlineVoiceDrift::IsMuted(uint32 LocalUserNum, const FUniqueNetId& UniqueI
 
 bool FOnlineVoiceDrift::IsLocallyMuted(const FUniqueNetId& UniqueId) const
 {
-	int32 Index = MuteList.Find((const FUniqueNetIdDrift&)UniqueId);
+	int32 Index = MuteList.Find(FUniqueNetIdDrift::ParseDriftId(UniqueId));
 	return Index != INDEX_NONE;
 }
 
@@ -437,7 +436,7 @@ bool FOnlineVoiceDrift::MuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId&
 	{
 		if (bIsSystemWide)
 		{
-			SystemMuteList.AddUnique((const FUniqueNetIdDrift&)PlayerId);
+			SystemMuteList.AddUnique(FUniqueNetIdDrift::ParseDriftId(PlayerId));
 			ProcessMuteChangeNotification();
 		}
 		else
@@ -451,7 +450,7 @@ bool FOnlineVoiceDrift::MuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetId&
 				FRemoteTalker* Talker = FindRemoteTalker(PlayerId);
 				if (Talker != NULL)
 				{
-					MuteList.AddUnique((const FUniqueNetIdDrift&)PlayerId);
+					MuteList.AddUnique(FUniqueNetIdDrift::ParseDriftId(PlayerId));
 					Return = ONLINE_SUCCESS;
 					UE_LOG(LogVoice, Log, TEXT("Muting remote talker (%s)"), *PlayerId.ToDebugString());
 				}
@@ -478,7 +477,7 @@ bool FOnlineVoiceDrift::UnmuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetI
 		if (bIsSystemWide)
 		{
 			// Remove them from the mute list
-			SystemMuteList.RemoveSingleSwap((const FUniqueNetIdDrift&)PlayerId);
+			SystemMuteList.RemoveSingleSwap(FUniqueNetIdDrift::ParseDriftId(PlayerId));
 			ProcessMuteChangeNotification();
 		}
 		else
@@ -497,7 +496,7 @@ bool FOnlineVoiceDrift::UnmuteRemoteTalker(uint8 LocalUserNum, const FUniqueNetI
 					if (!bIsMuted)
 					{
 						// Remove them from the mute list
-						MuteList.RemoveSingleSwap((const FUniqueNetIdDrift&)PlayerId);
+						MuteList.RemoveSingleSwap(FUniqueNetIdDrift::ParseDriftId(PlayerId));
 						UE_LOG(LogVoice, Log, TEXT("Unmuting remote talker (%s)"), *PlayerId.ToDebugString());
 					}
 				}
@@ -559,7 +558,7 @@ void FOnlineVoiceDrift::UpdateMuteListForLocalTalker(int32 TalkerIndex, APlayerC
 		FUniqueNetIdRepl UniqueIdRepl(Talker.TalkerId);
 
 		// Is the remote talker on this local player's mute list?
-		if (SystemMuteList.Find((FUniqueNetIdDrift&)*Talker.TalkerId) == INDEX_NONE)
+		if (SystemMuteList.Find(FUniqueNetIdDrift::ParseDriftId(*Talker.TalkerId)) == INDEX_NONE)
 		{
 			// Unmute on the server
 			PlayerController->ServerUnmutePlayer(UniqueIdRepl);
@@ -583,8 +582,7 @@ TSharedPtr<FVoicePacket> FOnlineVoiceDrift::SerializeRemotePacket(FArchive& Ar)
 	{
 		if (!OnlineSubsystem->IsDedicated())
 		{
-			FUniqueNetIdMatcher PlayerMatch(*NewPacket->GetSender());
-			if (MuteList.IndexOfByPredicate(PlayerMatch) == INDEX_NONE)
+			if (MuteList.IndexOfByKey(FUniqueNetIdDrift::ParseDriftId(*NewPacket->GetSender())) == INDEX_NONE)
 			{
 				VoiceData.RemotePackets.Add(NewPacket);
 			}
@@ -840,17 +838,17 @@ FString FOnlineVoiceDrift::GetVoiceDebugState() const
 	Output += TEXT("\nRaw SystemMutelist:\n");
 	for (int32 idx=0; idx < SystemMuteList.Num(); idx++)
 	{
-		Output += FString::Printf(TEXT("[%d]=%s\n"),
+		Output += FString::Printf(TEXT("[%d]=%d\n"),
 			idx,
-			*SystemMuteList[idx].ToString());
+			SystemMuteList[idx]);
 	}
 
 	Output += TEXT("\nRaw Mutelist:\n");
 	for (int32 idx=0; idx < MuteList.Num(); idx++)
 	{
-		Output += FString::Printf(TEXT("[%d]=%s\n"),
+		Output += FString::Printf(TEXT("[%d]=%d\n"),
 			idx,
-			*MuteList[idx].ToString());
+			MuteList[idx]);
 	}
 
 	return Output;

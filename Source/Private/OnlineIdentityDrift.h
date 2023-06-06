@@ -100,10 +100,10 @@ private:
 	   void OnPlayerNameSet(bool success, const FString& name);
 
     /** Ids mapped to locally registered users */
-    TMap<int32, TSharedPtr<const FUniqueNetId>> UserIds;
+    TMap<int32, TSharedRef<FUniqueNetIdDrift>> UserIds;
 
     /** Ids mapped to locally registered users */
-    TMap<FUniqueNetIdDrift, TSharedRef<FUserOnlineAccountDrift>> UserAccounts;
+    TMap<DriftID, TSharedRef<FUserOnlineAccountDrift>> UserAccounts;
 
     FOnlineSubsystemDrift* DriftSubsystem;
 

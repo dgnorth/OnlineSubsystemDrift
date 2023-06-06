@@ -52,7 +52,7 @@ bool FOnlineIdentityDrift::Login(int32 LocalUserNum, const FOnlineAccountCredent
     }
     else
     {
-        TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
+        auto UserId = UserIds.Find(LocalUserNum);
         if (UserId == nullptr)
         {
             if (auto Drift = DriftSubsystem->GetDrift())
@@ -67,8 +67,7 @@ bool FOnlineIdentityDrift::Login(int32 LocalUserNum, const FOnlineAccountCredent
         }
         else
         {
-            const FUniqueNetIdDrift* UniqueIdStr = (FUniqueNetIdDrift*)(UserId->Get());
-            TSharedRef<FUserOnlineAccountDrift>* TempPtr = UserAccounts.Find(*UniqueIdStr);
+            TSharedRef<FUserOnlineAccountDrift>* TempPtr = UserAccounts.Find((*UserId)->GetId());
             check(TempPtr);
             UserAccountPtr = *TempPtr;
         }
@@ -78,7 +77,7 @@ bool FOnlineIdentityDrift::Login(int32 LocalUserNum, const FOnlineAccountCredent
     {
         UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
 
-        TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdDrift{}, ErrorStr);
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *FUniqueNetIdDrift::EmptyId(), ErrorStr);
         return false;
     }
 
@@ -94,12 +93,12 @@ void FOnlineIdentityDrift::OnAuthenticated(bool success, const FPlayerAuthentica
 
     if (success)
     {
-        FUniqueNetIdDrift* NewUserId = new FUniqueNetIdDrift(info.playerId);
-        TSharedRef<FUserOnlineAccountDrift> UserAccountRef(new FUserOnlineAccountDrift(MakeShareable(NewUserId), info.playerName));
+        auto NewUserId = FUniqueNetIdDrift::Create(info.playerId);
+        TSharedRef<FUserOnlineAccountDrift> UserAccountRef(new FUserOnlineAccountDrift(NewUserId, info.playerName));
 
-        UserAccounts.Add(static_cast<FUniqueNetIdDrift>(*UserAccountRef->GetUserId()), UserAccountRef);
+        UserAccounts.Add(info.playerId, UserAccountRef);
 
-        UserIds.Add(LocalUserNum, UserAccountRef->GetUserId());
+        UserIds.Add(LocalUserNum, NewUserId);
 
         TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountRef->GetUserId(), *ErrorStr);
         TriggerOnLoginStatusChangedDelegates(LocalUserNum, ELoginStatus::NotLoggedIn, ELoginStatus::LoggedIn, *UserAccountRef->GetUserId());
@@ -114,22 +113,21 @@ void FOnlineIdentityDrift::OnAuthenticated(bool success, const FPlayerAuthentica
     {
         UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *info.error);
 
-        TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdDrift(), info.error);
+        TriggerOnLoginCompleteDelegates(LocalUserNum, false, *FUniqueNetIdDrift::EmptyId(), info.error);
     }
 }
 
 
 void FOnlineIdentityDrift::OnServerRegistered(bool success)
 {
-	const auto NetId = MakeShared<FUniqueNetIdDrift>(FUniqueNetIdDrift{});
-    if (success)
+	if (success)
     {
-        TriggerOnLoginCompleteDelegates(0, true, *NetId, TEXT(""));
+        TriggerOnLoginCompleteDelegates(0, true, *FUniqueNetIdDrift::EmptyId(), TEXT(""));
         return;
     }
 
     UE_LOG_ONLINE(Warning, TEXT("Server registration failed"));
-    TriggerOnLoginCompleteDelegates(0, false, *NetId, TEXT("Unknown failure"));
+    TriggerOnLoginCompleteDelegates(0, false, *FUniqueNetIdDrift::EmptyId(), TEXT("Unknown failure"));
 }
 
 
@@ -140,8 +138,7 @@ void FOnlineIdentityDrift::OnPlayerNameSet(bool success, const FString& name)
 		const TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(0);
 		if (UserId.IsValid())
 		{
-			const auto UserAccount = UserAccounts.Find(FUniqueNetIdDrift(*UserId));
-			if (UserAccount != nullptr)
+			if (const auto UserAccount = UserAccounts.Find(FUniqueNetIdDrift::ParseDriftId(*UserId)))
 			{
 			    if (auto Drift = DriftSubsystem->GetDrift())
 			    {
@@ -160,7 +157,7 @@ bool FOnlineIdentityDrift::Logout(int32 LocalUserNum)
     TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(LocalUserNum);
     if (UserId.IsValid())
     {
-        UserAccounts.Remove(FUniqueNetIdDrift(*UserId));
+        UserAccounts.Remove(FUniqueNetIdDrift::ParseDriftId(*UserId));
         UserIds.Remove(LocalUserNum);
         TriggerOnLogoutCompleteDelegates(LocalUserNum, true);
 
@@ -203,8 +200,7 @@ TSharedPtr<FUserOnlineAccount> FOnlineIdentityDrift::GetUserAccount(const FUniqu
 {
     TSharedPtr<FUserOnlineAccount> Result;
 
-    FUniqueNetIdDrift DriftUserId(UserId);
-    auto FoundUserAccount = UserAccounts.Find(DriftUserId);
+    auto FoundUserAccount = UserAccounts.Find(FUniqueNetIdDrift::ParseDriftId(UserId));
     if (FoundUserAccount != nullptr)
     {
         Result = *FoundUserAccount;
@@ -216,18 +212,17 @@ TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityDrift::GetAllUserAccounts
 {
     TArray<TSharedPtr<FUserOnlineAccount> > Result;
 
-    for (TMap<FUniqueNetIdDrift, TSharedRef<FUserOnlineAccountDrift>>::TConstIterator It(UserAccounts); It; ++It)
-    {
-        Result.Add(It.Value());
-    }
+	for (const auto Itr : UserAccounts)
+	{
+		Result.Add(Itr.Value);
+	}
 
-    return Result;
+	return Result;
 }
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityDrift::GetUniquePlayerId(int32 LocalUserNum) const
 {
-    const TSharedPtr<const FUniqueNetId>* FoundId = UserIds.Find(LocalUserNum);
-    if (FoundId != nullptr)
+    if (auto FoundId = UserIds.Find(LocalUserNum))
     {
         return *FoundId;
     }
@@ -238,14 +233,14 @@ TSharedPtr<const FUniqueNetId> FOnlineIdentityDrift::CreateUniquePlayerId(uint8*
 {
     if (Bytes != nullptr && Size == sizeof(DriftID))
     {
-        return MakeShareable(new FUniqueNetIdDrift(*reinterpret_cast<uint32*>(Bytes)));
+        return FUniqueNetIdDrift::Create(*reinterpret_cast<uint32*>(Bytes));
     }
     return nullptr;
 }
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityDrift::CreateUniquePlayerId(const FString& Str)
 {
-    return MakeShareable(new FUniqueNetIdDrift(Str));
+    return FUniqueNetIdDrift::Create(Str);
 }
 
 ELoginStatus::Type FOnlineIdentityDrift::GetLoginStatus(int32 LocalUserNum) const

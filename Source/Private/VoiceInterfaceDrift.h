@@ -32,9 +32,9 @@ class ONLINESUBSYSTEMDRIFT_API FOnlineVoiceDrift : public IOnlineVoice
 	/** State of all possible remote talkers */
 	TArray<FRemoteTalker> RemoteTalkers;
 	/** Remote players locally muted explicitly */
-	TArray<FUniqueNetIdDrift> SystemMuteList;
+	TArray<DriftID> SystemMuteList;
 	/** All remote players locally muted */
-	TArray<FUniqueNetIdDrift> MuteList;
+	TArray<DriftID> MuteList;
 
 	/** Time to wait for new data before triggering "not talking" */
 	float VoiceNotificationDelta;

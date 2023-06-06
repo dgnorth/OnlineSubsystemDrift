@@ -217,7 +217,7 @@ uint32 FVoiceEngineDrift::StopLocalVoiceProcessing(uint32 LocalUserNum)
 
 uint32 FVoiceEngineDrift::UnregisterRemoteTalker(const FUniqueNetId& UniqueId)
 {
-	const FUniqueNetIdDrift& RemoteTalkerId = (const FUniqueNetIdDrift&)UniqueId;
+	const auto RemoteTalkerId = FUniqueNetIdDrift::ParseDriftId(UniqueId);
 	FRemoteTalkerDataDrift* RemoteData = RemoteTalkerBuffers.Find(RemoteTalkerId);
 	if (RemoteData != nullptr)
 	{
@@ -352,7 +352,7 @@ uint32 FVoiceEngineDrift::SubmitRemoteVoiceData(const FUniqueNetId& RemoteTalker
 {
 	UE_LOG(LogVoiceDecode, VeryVerbose, TEXT("SubmitRemoteVoiceData(%s) Size: %d received!"), *RemoteTalkerId.ToDebugString(), *Size);
 
-	const FUniqueNetIdDrift& TalkerId = (const FUniqueNetIdDrift&)RemoteTalkerId;
+	const auto TalkerId = FUniqueNetIdDrift::ParseDriftId(RemoteTalkerId);
 	FRemoteTalkerDataDrift& QueuedData = RemoteTalkerBuffers.FindOrAdd(TalkerId);
 
 	// new voice packet.
@@ -444,7 +444,7 @@ void FVoiceEngineDrift::OnAudioFinished(UAudioComponent* AC)
 		FRemoteTalkerDataDrift& RemoteData = It.Value();
 		if (!IsValid(RemoteData.AudioComponent) || AC == RemoteData.AudioComponent)
 		{
-			UE_LOG(LogVoiceDecode, Log, TEXT("Removing VOIP AudioComponent for Id: %s"), *It.Key().ToDebugString());
+			UE_LOG(LogVoiceDecode, Log, TEXT("Removing VOIP AudioComponent for Id: %d"), It.Key());
 			RemoteData.AudioComponent = nullptr;
 			break;
 		}

@@ -85,38 +85,13 @@ public:
 
 using DriftID = uint32;
 
+typedef TSharedPtr<class FUniqueNetIdDrift> FUniqueNetIdDriftPtr;
+typedef TSharedRef<class FUniqueNetIdDrift> FUniqueNetIdDriftRef;
+
 class FUniqueNetIdDrift : public FUniqueNetId
 {
 public:
-    FUniqueNetIdDrift()
-    : driftId_{ 0 }
-    {
-    }
-
-    explicit FUniqueNetIdDrift(const FUniqueNetId& Src)
-    {
-        if (Src.GetSize() == sizeof(driftId_))
-        {
-            driftId_ = static_cast<const FUniqueNetIdDrift&>(Src).driftId_;
-        }
-    }
-
-    explicit FUniqueNetIdDrift(const FUniqueNetIdDrift& other)
-    : driftId_{ other.driftId_ }
-    {
-    }
-    
-    FUniqueNetIdDrift(uint32 driftId)
-    : driftId_{ driftId }
-    {
-    }
-
-    explicit FUniqueNetIdDrift(const FString& Str)
-    : driftId_(FCString::Atoi(*Str))
-    {
-    }
-	
-	FName GetType() const override
+    FName GetType() const override
 	{
 		return DRIFT_SUBSYSTEM;
 	}
@@ -151,11 +126,63 @@ public:
         return other.driftId_;
     }
 
-    uint32 GetId() const
+	DriftID GetId() const
     {
         return driftId_;
     }
 
+	static DriftID ParseDriftId(const FUniqueNetId& Src)
+	{
+		if (ensure(Src.GetType() == DRIFT_SUBSYSTEM))
+		{
+			return static_cast<const FUniqueNetIdDrift&>(Src).driftId_;
+		}
+		return 0;
+	}
+
+	static DriftID ParseDriftId(const FString& Str)
+	{
+		return FCString::Atoi(*Str);
+	}
+
+	static FUniqueNetIdDriftRef EmptyId()
+	{
+		static const auto DummyId = MakeShareable(new FUniqueNetIdDrift());
+		return DummyId;
+	}
+
+	template<class T>
+	static FUniqueNetIdDriftRef Create(const T& Src)
+	{
+		return MakeShareable(new FUniqueNetIdDrift(Src));
+	}
+
 private:
-    uint32 driftId_;
+	FUniqueNetIdDrift()
+		: driftId_{ 0 }
+	{
+	}
+
+	explicit FUniqueNetIdDrift(const FUniqueNetId& Src)
+		: driftId_{ ParseDriftId(Src) }
+	{
+	}
+
+	explicit FUniqueNetIdDrift(const FUniqueNetIdDrift& other)
+		: driftId_{ other.driftId_ }
+	{
+	}
+
+	FUniqueNetIdDrift(uint32 driftId)
+		: driftId_{ driftId }
+	{
+	}
+
+	explicit FUniqueNetIdDrift(const FString& Str)
+		: driftId_{ ParseDriftId(Str) }
+	{
+	}
+
+private:
+	DriftID driftId_;
 };

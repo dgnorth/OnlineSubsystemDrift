@@ -561,8 +561,7 @@ bool FOnlineSessionDrift::StartMatchmaking(const TArray< TSharedRef<const FUniqu
         FString token;
         if (SearchSettings->QuerySettings.Get(TEXT("friend_id"), friendId))
         {
-            FUniqueNetIdDrift driftId{ friendId };
-            drift->InvitePlayerToMatch(driftId.GetId(), FDriftJoinedMatchQueueDelegate::CreateRaw(this, &FOnlineSessionDrift::OnJoinedMatchQueue));
+            drift->InvitePlayerToMatch(FUniqueNetIdDrift::ParseDriftId(friendId), FDriftJoinedMatchQueueDelegate::CreateRaw(this, &FOnlineSessionDrift::OnJoinedMatchQueue));
         }
         else if (SearchSettings->QuerySettings.Get(TEXT("invite_token"), token))
         {
@@ -1036,9 +1035,7 @@ void FOnlineSessionDrift::UnregisterVoice(const FUniqueNetId& PlayerId)
 
 bool FOnlineSessionDrift::RegisterPlayer(FName SessionName, const FUniqueNetId& PlayerId, bool bWasInvited)
 {
-    TArray< TSharedRef<const FUniqueNetId> > Players;
-    Players.Add(MakeShareable(new FUniqueNetIdDrift(PlayerId)));
-    return RegisterPlayers(SessionName, Players, bWasInvited);
+    return RegisterPlayers(SessionName, { FUniqueNetIdDrift::Create(PlayerId) }, bWasInvited);
 }
 
 bool FOnlineSessionDrift::RegisterPlayers(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& Players, bool bWasInvited)
@@ -1061,7 +1058,7 @@ bool FOnlineSessionDrift::RegisterPlayers(FName SessionName, const TArray<TShare
                 {
                     if (auto Drift = DriftSubsystem->GetDrift())
                     {
-                        Drift->AddPlayerToMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), 0, FDriftPlayerAddedDelegate::CreateLambda([this, SessionName, Players](bool success)
+                        Drift->AddPlayerToMatch(FUniqueNetIdDrift::ParseDriftId(*PlayerId), 0, FDriftPlayerAddedDelegate::CreateLambda([this, SessionName, Players](bool success)
                         {
                             if (success)
                             {
@@ -1104,9 +1101,7 @@ bool FOnlineSessionDrift::RegisterPlayers(FName SessionName, const TArray<TShare
 
 bool FOnlineSessionDrift::UnregisterPlayer(FName SessionName, const FUniqueNetId& PlayerId)
 {
-    TArray< TSharedRef<const FUniqueNetId> > Players;
-    Players.Add(MakeShareable(new FUniqueNetIdDrift(PlayerId)));
-    return UnregisterPlayers(SessionName, Players);
+    return UnregisterPlayers(SessionName, { FUniqueNetIdDrift::Create(PlayerId) });
 }
 
 bool FOnlineSessionDrift::UnregisterPlayers(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& Players)
@@ -1129,7 +1124,7 @@ bool FOnlineSessionDrift::UnregisterPlayers(FName SessionName, const TArray<TSha
                 {
                     if (auto Drift = DriftSubsystem->GetDrift())
                     {
-                        Drift->RemovePlayerFromMatch(FUniqueNetIdDrift{ *PlayerId }.GetId(), FDriftPlayerRemovedDelegate::CreateLambda([this, SessionName, Players](bool success)
+                        Drift->RemovePlayerFromMatch(FUniqueNetIdDrift::ParseDriftId(*PlayerId), FDriftPlayerRemovedDelegate::CreateLambda([this, SessionName, Players](bool success)
                         {
                             if (success)
                             {
